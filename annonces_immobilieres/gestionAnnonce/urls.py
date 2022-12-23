@@ -7,7 +7,4 @@ urlpatterns = [
     path('create/',create_Annocement),
     path('consult/',consult_Announcement),
     path('all/',consult_Announcements),
-
-   
-
 ]

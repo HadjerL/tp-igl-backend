@@ -7,7 +7,7 @@ class Caregorie(models.Model):
     nom_cat = models.CharField(max_length=20)
 
 class Type(models.Model):
-    nom_type = models.CharField(max_length=20)
+    nom_type=models.CharField(max_length=20)
 
 
 
@@ -28,3 +28,4 @@ class Annonce(models.Model):
     description = models.TextField(blank=True)
     contact = models.ForeignKey(Contact,default='', related_name='annonce',on_delete=models.CASCADE)
     thumbnail = models.ImageField(upload_to="photo%y%m%d",blank=True,null=True)
+   

@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
-from rest_framework import status
+from rest_framework import status,generics,viewsets ,filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer,CaregorieSerializer
+from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer
 from .models import Annonce , Type,Contact,Caregorie
+
 
 
 @api_view(['GET'])
@@ -12,18 +13,17 @@ def consult_Announcements(request):
     serializer = AnnoceSerializer(annonce, many=True)
     return Response(serializer.data)
 
-@api_view(['POST'])
-def create_Annocement(request):
-    serializer = AnnoceSerializer(data=request.data)
-    if serializer.is_valid():
-         serializer.save()
-         return Response(serializer.data,status=status.HTTP_201_CREATED)
-    return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
+
+class create_Annocement(generics.CreateAPIView):
+    queryset=Annonce.objects.all()
+    serializer_class=AnnoceSerializer
+
+
 
 @api_view(['GET'])
-def consult_Announcement(request,id):
+def consult_Announcement(request,_id):
     try:
-          annonce= Annonce.objects.get(id=id)
+          annonce= Annonce.objects.get(id=_id)
     except Annonce.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     serializer = AnnoceSerializer(annonce)
@@ -32,9 +32,9 @@ def consult_Announcement(request,id):
 
 
 @api_view(['PUT'])
-def modify_Announcement(request,id):
+def modify_Announcement(request,_id):
     try:
-         annonce= Annonce.objects.get(id=id)
+         annonce= Annonce.objects.get(id=_id)
     except Annonce.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -43,6 +43,25 @@ def modify_Announcement(request,id):
         serializer.save()
         return Response(serializer.data,status=status.HTTP_200_OK)
     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def find_annocement_type(request):
+    type=Type.objects.filter(nom_type='vhfg')
+    annonce = Annonce.objects.filter(type__id__in = type)
+    serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)
+
+
+
+class viewsets_annoncement(viewsets.ModelViewSet):
+       queryset=Annonce.objects.all()
+       serializer_class=AnnoceSerializer
+       
+class viewsets_type(viewsets.ModelViewSet): 
+    queryset=Type.objects.all()
+    serializer_class=TypeSerializer
+    filter_backends=[filters.SearchFilter]
+    search_fields=['nom_type']
 
 
 

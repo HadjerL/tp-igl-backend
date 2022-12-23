@@ -1,12 +1,9 @@
 from rest_framework import serializers
 from .models import Annonce,Contact,Type,Caregorie
 
+#translate python to json
 
 
-class CaregorieSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Caregorie
-        fields = 'annonce'
 
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,7 +13,7 @@ class ContactSerializer(serializers.ModelSerializer):
 class TypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Type
-        fields = '__all__'
+        fields = ['nom_type']
 
 class AnnoceSerializer(serializers.ModelSerializer):
     class Meta:

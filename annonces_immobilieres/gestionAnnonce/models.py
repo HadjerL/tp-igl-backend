@@ -7,7 +7,7 @@ class Caregorie(models.Model):
     nom_cat = models.CharField(max_length=20)
 
 class Type(models.Model):
-    nom_type = models.CharField(max_length=20)
+    nom_type=models.CharField(max_length=20)
 
 
 

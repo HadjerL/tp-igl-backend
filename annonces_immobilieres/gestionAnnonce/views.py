@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework import status,generics,viewsets ,filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer,CaregorieSerializer
+from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer
 from .models import Annonce , Type,Contact,Caregorie
 
 
@@ -44,7 +44,12 @@ def modify_Announcement(request,_id):
         return Response(serializer.data,status=status.HTTP_200_OK)
     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-
+@api_view(['GET'])
+def find_annocement_type(request):
+    type=Type.objects.filter(nom_type='vhfg')
+    annonce = Annonce.objects.filter(type__id__in = type)
+    serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)
 
 
 

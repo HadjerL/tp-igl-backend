@@ -11,7 +11,7 @@ urlpatterns = [
     path('create/',create_Annocement.as_view() ),
     path('consult/<int:_id>',consult_Announcement),
     path('all/',consult_Announcements),
-    
+    path("find_type/", views.find_annocement_type),
     path('',include(router.urls)),
 
 

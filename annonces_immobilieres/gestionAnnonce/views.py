@@ -5,8 +5,7 @@ from rest_framework.response import Response
 from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer
 from .models import Annonce , Type,Contact,Caregorie
 
-
-
+# to view all announcements
 @api_view(['GET'])
 def consult_Announcements(request):
     annonce= Annonce.objects.all()
@@ -20,24 +19,23 @@ class create_Annocement(generics.CreateAPIView):
 
 
 
+# to view one announcement by id
 @api_view(['GET'])
 def consult_Announcement(request,_id):
     try:
-          annonce= Annonce.objects.get(id=_id)
+        annonce= Annonce.objects.get(id=id)
     except Annonce.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     serializer = AnnoceSerializer(annonce)
     return Response(serializer.data)
 
-
-
+# to modify annoucement
 @api_view(['PUT'])
 def modify_Announcement(request,_id):
     try:
-         annonce= Annonce.objects.get(id=_id)
+        annonce= Annonce.objects.get(id=id)
     except Annonce.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
     serializer = AnnoceSerializer(annonce,data=request.data)
     if serializer.is_valid():
         serializer.save()

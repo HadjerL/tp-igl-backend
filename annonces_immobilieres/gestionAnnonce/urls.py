@@ -13,8 +13,5 @@ urlpatterns = [
     path('all/',consult_Announcements),
     path("find_type/", views.find_annocement_type),
     path('',include(router.urls)),
-
-
-   
-
+    path('try/', views.trial)
 ]

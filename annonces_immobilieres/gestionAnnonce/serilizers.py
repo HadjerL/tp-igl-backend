@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune , Location
+from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune , Location,AnnoncementImage
 
 #translate python to json
 
@@ -15,10 +15,38 @@ class TypeSerializer(serializers.ModelSerializer):
         model = Type
         fields = ['nom_type']
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Caregorie
+        fields = ['nom_cat']
+
+class AnnoncementImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnnoncementImage
+        fields = ["id", "image", "annoncement"]
+
+
 class AnnoceSerializer(serializers.ModelSerializer):
+    images=AnnoncementImageSerializer(many=True, read_only=True)
+    type= TypeSerializer(many=False, read_only=True)
+    caregorie= CategorySerializer(many= False, read_only= True)
     class Meta:
         model = Annonce
-        fields = '__all__'
+        fields = [
+            'id',
+            'caregorie',
+            'type',
+            'images'
+            ]
+
+class CommunSerializer(serializers.ModelSerializer):
+    model = Commune
+    fields = ['designation', 'location']
+    # gets the field designation from commune and locations related
+class WilayaSerializer(serializers.ModelSerializer):
+    model = Wilaya
+    fields = ['designation','location']
+    # gets the field designation from wilaya and location related
 
 class CommunSerializer(serializers.ModelSerializer):
     model = Commune

@@ -3,8 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status,generics,viewsets ,filters
 from rest_framework.response import Response
 from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer
-from .models import Annonce , Type,Contact,Caregorie,Commune
-from django.http.response import JsonResponse
+from .models import Annonce , Type,Contact,Caregorie,AnnoncementImage
 
 # to view all announcements
 @api_view(['GET'])
@@ -13,9 +12,33 @@ def consult_Announcements(request):
     serializer = AnnoceSerializer(annonce, many=True)
     return Response(serializer.data)
 
-class create_Annocement(generics.CreateAPIView):
-    queryset=Annonce.objects.all()
-    serializer_class=AnnoceSerializer
+# to creat annoucement
+@api_view(['Post'])
+def create_Annocement(request):
+    annonce = Annonce()
+    annonce.interface =request.data['area']
+    annonce.description=request.data['description']
+    annonce.prix=request.data['price']
+    type =Type()
+    type.pk= request.data['type']
+    cat = Caregorie()
+    cat.pk =request.data['caregory']
+    contacts=Contact()
+    contacts.nom =request.data['lastname']
+    contacts.prenom =request.data['name']
+    contacts.adresse=request.data['address']
+    contacts.tele =request.data['phone']
+    contacts.save()
+    annonce.contact=contacts
+    annonce.type=type
+    annonce.caregorie =cat
+    annonce.save()
+    uploaded_images = request.FILES.getlist('uploaded_images')
+    for img in uploaded_images:
+        AnnoncementImage.objects.create(annoncement =annonce,image=img)
+    return Response(status=status.HTTP_201_CREATED) 
+
+
 
 # to view one announcement by id
 @api_view(['GET'])
@@ -47,20 +70,14 @@ def find_annocement_type(request):
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
 
+
+
 class viewsets_annoncement(viewsets.ModelViewSet):
     queryset=Annonce.objects.all()
     serializer_class=AnnoceSerializer
-
+    
 class viewsets_type(viewsets.ModelViewSet): 
     queryset=Type.objects.all()
     serializer_class=TypeSerializer
     filter_backends=[filters.SearchFilter]
     search_fields=['nom_type']
-
-
-def trial(request):
-    data= Commune.objects.all()
-    response ={
-        'commune':list(data.values())
-    }
-    return JsonResponse(response)

@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'smart_selects',# for the chained forienkey 
     'user.apps.UserConfig',
     'gestionAnnonce.apps.GestionannonceConfig',
     
@@ -127,6 +126,3 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL ="user.User"
-
-#allows the usage of smart selcts
-USE_DJANGO_JQUERY = True

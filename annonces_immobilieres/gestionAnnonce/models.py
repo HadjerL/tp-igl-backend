@@ -22,7 +22,7 @@ class Annonce(models.Model):
     prix= models.FloatField(default=0.0)
     description = models.TextField(blank=True)
     contact = models.ForeignKey(Contact,default='', related_name='annonce',on_delete=models.CASCADE)
-
+#ay haja
 class AnnoncementImage(models.Model):
     annoncement = models.ForeignKey(Annonce,default='', related_name='images',on_delete=models.CASCADE)
     image =models.ImageField(upload_to="photo%y%m%d",blank=True,null=True)

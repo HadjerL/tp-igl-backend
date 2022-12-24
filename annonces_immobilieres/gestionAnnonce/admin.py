@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune, Localization
+from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune, Location
 
 # Registering models here.
 
@@ -9,4 +9,4 @@ admin.site.register(Caregorie)
 admin.site.register(Annonce)
 admin.site.register(Wilaya)
 admin.site.register(Commune)
-admin.site.register(Localization)
+admin.site.register(Location)

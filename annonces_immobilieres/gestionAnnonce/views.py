@@ -3,7 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status,generics,viewsets ,filters
 from rest_framework.response import Response
 from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer
-from .models import Annonce , Type,Contact,Caregorie
+from .models import Annonce , Type,Contact,Caregorie,Commune
+from django.http.response import JsonResponse
 
 # to view all announcements
 @api_view(['GET'])
@@ -12,12 +13,9 @@ def consult_Announcements(request):
     serializer = AnnoceSerializer(annonce, many=True)
     return Response(serializer.data)
 
-
 class create_Annocement(generics.CreateAPIView):
     queryset=Annonce.objects.all()
     serializer_class=AnnoceSerializer
-
-
 
 # to view one announcement by id
 @api_view(['GET'])
@@ -49,12 +47,10 @@ def find_annocement_type(request):
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
 
-
-
 class viewsets_annoncement(viewsets.ModelViewSet):
-       queryset=Annonce.objects.all()
-       serializer_class=AnnoceSerializer
-       
+    queryset=Annonce.objects.all()
+    serializer_class=AnnoceSerializer
+
 class viewsets_type(viewsets.ModelViewSet): 
     queryset=Type.objects.all()
     serializer_class=TypeSerializer
@@ -62,24 +58,9 @@ class viewsets_type(viewsets.ModelViewSet):
     search_fields=['nom_type']
 
 
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-        
-
-
-
+def trial(request):
+    data= Commune.objects.all()
+    response ={
+        'commune':list(data.values())
+    }
+    return JsonResponse(response)

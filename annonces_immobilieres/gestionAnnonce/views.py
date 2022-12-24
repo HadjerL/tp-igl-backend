@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework import status,generics,viewsets ,filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer
+from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer,CommuneSerializer
 from .models import Annonce , Type,Contact,Caregorie,Commune
 from django.http.response import JsonResponse
 
@@ -57,10 +57,15 @@ class viewsets_type(viewsets.ModelViewSet):
     filter_backends=[filters.SearchFilter]
     search_fields=['nom_type']
 
-
+@api_view(['GET','POST'])
 def trial(request):
-    data= Commune.objects.all()
-    response ={
-        'commune':list(data.values())
-    }
-    return JsonResponse(response)
+    if request.method == 'GET':
+        commune = Commune.objects.all()
+        serializer = CommuneSerializer(commune,many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = CommuneSerializer(data= request.data)
+        if serializer.is_valid():
+            serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)

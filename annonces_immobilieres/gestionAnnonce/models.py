@@ -6,6 +6,8 @@ from smart_selects.db_fields import ChainedForeignKey
 
 class Caregorie(models.Model):
     nom_cat = models.CharField(max_length=20)
+    def __str__(self):
+        return self.nom_cat
 
 class Type(models.Model):
     nom_type = models.CharField(max_length=20)
@@ -33,7 +35,7 @@ class Commune(models.Model):
     wilaya = models.ForeignKey( #each commune has one wilaya
         Wilaya,
         on_delete=models.PROTECT,
-        default='',
+        default=None,
         related_name= 'Commune'
         )
     def __str__(self):
@@ -43,7 +45,7 @@ class Location(models.Model):
     wilaya = models.ForeignKey( #each localization has one wilaya
         Wilaya,
         on_delete= models.CASCADE,
-        default='',
+        default=None,
         related_name='location'
         )
     commune = ChainedForeignKey( # to get only and all communes in a wilaya
@@ -52,7 +54,7 @@ class Location(models.Model):
         chained_model_field="wilaya",
         show_all=False,  # only show commune corresponding to selected wilaya
         on_delete= models.CASCADE,
-        default='',
+        default=None,
         related_name= 'location',
         auto_choose= True
         )
@@ -61,6 +63,7 @@ class Location(models.Model):
         return self.address
 
 class Annonce(models.Model):
+    title= models.CharField(max_length=30,default='')
     caregorie = models.ForeignKey(Caregorie,default='', related_name='annonce',on_delete=models.CASCADE)
     type = models.ForeignKey(Type,default='', related_name='annonce',on_delete=models.CASCADE)
     interface = models.FloatField(default=0.0)
@@ -68,3 +71,10 @@ class Annonce(models.Model):
     description = models.TextField(blank=True)
     contact = models.ForeignKey(Contact,default='', related_name='annonce',on_delete=models.CASCADE)
     thumbnail = models.ImageField(upload_to="photo%y%m%d",blank=True,null=True)
+    location= models.OneToOneField(
+        Location,
+        default=None,
+        on_delete=models.CASCADE,
+        )
+    def __str__(self):
+        return self.title

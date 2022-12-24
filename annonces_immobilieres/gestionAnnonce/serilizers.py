@@ -20,14 +20,17 @@ class AnnoceSerializer(serializers.ModelSerializer):
         model = Annonce
         fields = '__all__'
 
-class CommunSerializer(serializers.ModelSerializer):
+class CommuneSerializer(serializers.ModelSerializer):
     model = Commune
     fields = ['designation', 'location']
     # gets the field designation from commune and locations related
+
+
 class WilayaSerializer(serializers.ModelSerializer):
     model = Wilaya
-    fields = ['designation','location']
+    fields = ['id','location']
     # gets the field designation from wilaya and location related
+
 
 class LocationSerializer(serializers.ModelSerializer):
     model = Location

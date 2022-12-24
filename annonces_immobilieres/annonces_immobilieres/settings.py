@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'smart_selects',# for the chained forienkey 
-    'user.apps.UserConfig',
     'gestionAnnonce.apps.GestionannonceConfig',
     
 ]
@@ -125,8 +124,6 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL ="user.User"
 
 #allows the usage of smart selcts
 USE_DJANGO_JQUERY = True

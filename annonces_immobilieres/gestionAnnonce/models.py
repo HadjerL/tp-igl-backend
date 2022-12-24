@@ -6,7 +6,8 @@ from smart_selects.db_fields import ChainedForeignKey
 
 class Caregorie(models.Model):
     nom_cat = models.CharField(max_length=20)
-
+    def __str__(self):
+        return self.nom_cat
 class Type(models.Model):
     nom_type = models.CharField(max_length=20)
     def __str__(self):
@@ -61,10 +62,14 @@ class Location(models.Model):
         return self.address
 
 class Annonce(models.Model):
+    title= models.CharField(max_length=35, default='')
     caregorie = models.ForeignKey(Caregorie,default='', related_name='annonce',on_delete=models.CASCADE)
     type = models.ForeignKey(Type,default='', related_name='annonce',on_delete=models.CASCADE)
     interface = models.FloatField(default=0.0)
     prix= models.FloatField(default=0.0)
     description = models.TextField(blank=True)
     contact = models.ForeignKey(Contact,default='', related_name='annonce',on_delete=models.CASCADE)
-    thumbnail = models.ImageField(upload_to="photo%y%m%d",blank=True,null=True)
+#ay haja
+class AnnoncementImage(models.Model):
+    annoncement = models.ForeignKey(Annonce,default='', related_name='images',on_delete=models.CASCADE)
+    image =models.ImageField(upload_to="photo%y%m%d",blank=True,null=True)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Annonce,Contact,Type,Caregorie
+from .models import Annonce,Contact,Type,Caregorie,AnnoncementImage
 
 #translate python to json
 
@@ -15,10 +15,26 @@ class TypeSerializer(serializers.ModelSerializer):
         model = Type
         fields = ['nom_type']
 
+class AnnoncementImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnnoncementImage
+        fields = ["id", "image", "annoncement"]
+
 class AnnoceSerializer(serializers.ModelSerializer):
+    images=AnnoncementImageSerializer(many=True, read_only=True)
     class Meta:
         model = Annonce
-        fields = '__all__'
+        fields = [
+            'id',
+            'contact',
+            'description',
+            'prix',
+            'interface',
+            'type',
+            'caregorie',
+            'images',
+            
+        ]
 
 
 

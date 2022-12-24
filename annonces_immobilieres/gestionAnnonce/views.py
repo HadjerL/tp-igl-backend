@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status,generics,viewsets ,filters
 from rest_framework.response import Response
 from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer
-from .models import Annonce , Type,Contact,Caregorie
+from .models import Annonce , Type,Contact,Caregorie,AnnoncementImage
 
 # to view all announcements
 @api_view(['GET'])
@@ -12,10 +12,34 @@ def consult_Announcements(request):
     serializer = AnnoceSerializer(annonce, many=True)
     return Response(serializer.data)
 
-
-class create_Annocement(generics.CreateAPIView):
-    queryset=Annonce.objects.all()
-    serializer_class=AnnoceSerializer
+# to creat annoucement
+@api_view(['Post'])
+def create_Annocement(request):
+    annonce = Annonce()
+    annonce.interface =request.data['interface']
+    annonce.description=request.data['description']
+    annonce.prix=request.data['prix']
+    type =Type()
+    type.pk= request.data['type']
+    cat = Caregorie()
+    cat.pk =request.data['caregorie']
+    contacts=Contact()
+    contacts.nom =request.data['nom']
+    contacts.prenom =request.data['prenom']
+    contacts.adresse=request.data['adresse']
+    contacts.tele =request.data['tele']
+    contacts.save()
+    annonce.contact=contacts
+    annonce.type=type
+    annonce.caregorie =cat
+    annonce.save()
+    uploaded_images = request.FILES.getlist('uploaded_images')
+    for img in uploaded_images:
+         kk = AnnoncementImage()
+         kk.annoncement =annonce
+         kk.image=img
+         kk.save()
+    return Response(status=status.HTTP_201_CREATED) 
 
 
 

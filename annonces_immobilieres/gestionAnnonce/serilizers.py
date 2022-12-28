@@ -34,30 +34,38 @@ class AnnoceSerializer(serializers.ModelSerializer):
         model = Annonce
         fields = [
             'id',
+            'title',
             'caregorie',
+            'interface',
+            'prix',
+            'description',
+            'contact',
+            'location',
             'type',
             'images'
             ]
 
-class CommunSerializer(serializers.ModelSerializer):
-    model = Commune
-    fields = ['designation', 'location']
-    # gets the field designation from commune and locations related
-class WilayaSerializer(serializers.ModelSerializer):
-    model = Wilaya
-    fields = ['designation','location']
-    # gets the field designation from wilaya and location related
 
-class CommunSerializer(serializers.ModelSerializer):
-    model = Commune
-    fields = ['designation', 'location']
-    # gets the field designation from commune and locations related
 class WilayaSerializer(serializers.ModelSerializer):
-    model = Wilaya
-    fields = ['designation','location']
-    # gets the field designation from wilaya and location related
+    #targets the related field using its primaryKey
+    commune = serializers.StringRelatedField(many= True, read_only=True)
+    class Meta:
+        model = Wilaya
+        # gets the field designation from wilaya and all commune related
+        fields = ['designation','commune']
+
+class CommuneSerializer(serializers.ModelSerializer):
+    wilaya= serializers.StringRelatedField(many= False, read_only= True)
+    class Meta:
+        model = Commune
+        fields = ['designation','wilaya']
+        # gets the field designation from commune and locations related
+
 
 class LocationSerializer(serializers.ModelSerializer):
-    model = Location
-    fields = ['__all__','annonce']
+    wilaya= serializers.StringRelatedField(many=False, read_only=True)
+    commune= serializers.StringRelatedField(many=False, read_only=True)
+    class Meta:
+        model = Location
+        fields = ['wilaya__designation','commune__designation','address']
     # gets all fields along with related announcements

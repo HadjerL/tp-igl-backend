@@ -8,6 +8,8 @@ class Caregorie(models.Model):
     nom_cat = models.CharField(max_length=20)
     def __str__(self):
         return self.nom_cat
+
+
 class Type(models.Model):
     nom_type = models.CharField(max_length=20)
     def __str__(self):
@@ -35,7 +37,7 @@ class Commune(models.Model):
         Wilaya,
         on_delete=models.PROTECT,
         default=None,
-        related_name= 'Commune'
+        related_name= 'commune'
         )
     def __str__(self):
         return self.designation
@@ -64,7 +66,8 @@ class Location(models.Model):
 class Annonce(models.Model):
     title= models.CharField(max_length=35, default='')
     caregorie = models.ForeignKey(
-        Caregorie,default='',
+        Caregorie,
+        default='',
         related_name='annonce',
         on_delete=models.CASCADE
         )
@@ -86,10 +89,21 @@ class Annonce(models.Model):
         Location,
         default=None,
         on_delete=models.CASCADE,
+        related_name='annonce',
         )
     def __str__(self):
         return self.title
 #ay haja
 class AnnoncementImage(models.Model):
-    annoncement = models.ForeignKey(Annonce,default='', related_name='images',on_delete=models.CASCADE)
-    image =models.ImageField(upload_to="photo%y%m%d",blank=True,null=True)
+    annoncement = models.ForeignKey(
+        Annonce,default='',
+        related_name='images',
+        on_delete=models.CASCADE
+        )
+    image =models.ImageField(
+        upload_to="photo%y%m%d",
+        blank=True,
+        null=True
+        )
+    def __str__(self):
+        return self.image.url

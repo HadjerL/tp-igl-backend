@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'smart_selects',# for the chained forienkey 
+    'smart_selects',    #for the chained forienkey 
+    'phone_field',  #for phone number validation
     'gestionAnnonce.apps.GestionannonceConfig',
     
 ]

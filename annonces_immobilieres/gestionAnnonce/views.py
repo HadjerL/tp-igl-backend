@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer
-from .models import Annonce, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya
+from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer
+from .models import Annonce, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya,Address
 import geopy.geocoders
 geopy.geocoders.options.default_timeout = 7
 from geopy.geocoders import Nominatim
@@ -63,10 +63,13 @@ class viewsets_annoncement(viewsets.ModelViewSet):
 class viewsets_wilayas(viewsets.ModelViewSet):
     queryset=Wilaya.objects.all()
     serializer_class=WilayaSerializer
+    search_fields=['designation']
 
 class viewsets_commune(viewsets.ModelViewSet):
     queryset=Commune.objects.all()
     serializer_class=CommuneSerializer
+    filter_backends=[filters.SearchFilter]
+    search_fields=['designation']
 
 class viewsets_type(viewsets.ModelViewSet): 
     queryset=Type.objects.all()
@@ -74,6 +77,15 @@ class viewsets_type(viewsets.ModelViewSet):
     filter_backends=[filters.SearchFilter]
     search_fields=['nom_type']
 
+class viewsets_address(viewsets.ModelViewSet):
+    queryset= Address.objects.all()
+    serializer_class=AddressSerializer
+    search_fields=['address']
+
+class viewsets_location(viewsets.ModelViewSet):
+    queryset= Location.objects.all()
+    serializer_class= LocationSerializer
+    search_fields=['address__address']
 
 
 #===================================================================================================================
@@ -105,13 +117,18 @@ def create_Annocement(request):
         location=Location.objects.create(
             wilaya=wilaya,
             commune=commune,
-            address=request.data["address"]
+            address=Address.objects.create(
+                address= request.data["address"],
+                latitude=get_coordinates(request.data["address"])["lat"],
+                longitude=get_coordinates(request.data["address"])["long"],
+            )
         )
         )
     uploaded_images = request.FILES.getlist('uploaded_images')
     for img in uploaded_images:
         AnnoncementImage.objects.create(annoncement =annonce,image=img)
-    return Response(status=status.HTTP_201_CREATED) 
+    serializer= AnnoceSerializer(annonce)
+    return Response(serializer.data,status=status.HTTP_201_CREATED) 
 
 @api_view(['PUT'])
 def modify_Announcement(request,id):
@@ -123,7 +140,8 @@ def modify_Announcement(request,id):
         announcement= Annonce.objects.get(id= id)
         contact= Contact.objects.get(id=announcement.contact.id)
         location= Location.objects.get(id=announcement.location.id)
-    except Caregorie.DoesNotExist or Type.DoesNotExist or Wilaya.DoesNotExist or Commune.DoesNotExist or Annonce.DoesNotExist or Contact.DoesNotExist or Location.DoesNotExist:
+        address= Address.objects.get(id=location.address.id)
+    except Caregorie.DoesNotExist or Type.DoesNotExist or Wilaya.DoesNotExist or Commune.DoesNotExist or Annonce.DoesNotExist or Contact.DoesNotExist or Location.DoesNotExist or Address.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     announcement.title= request.data["title"]
     announcement.caregorie= category
@@ -137,7 +155,10 @@ def modify_Announcement(request,id):
     contact.tele=request.data["phone"],
     location.wilaya=wilaya
     location.commune=commune
-    location.address=request.data["address"]
+    address.address=request.data["address"]
+    address.latitude=get_coordinates(request.data["address"])["lat"]
+    address.longitude=get_coordinates(request.data["address"])["long"]
+    announcement.save()
     uploaded_images = request.FILES.getlist('uploaded_images')
     #ask the others about this later
     for img in uploaded_images:
@@ -145,7 +166,21 @@ def modify_Announcement(request,id):
     serializer= AnnoceSerializer(announcement)
     return Response(serializer.data,status=status.HTTP_201_CREATED) 
 
+#===================================================================================================================
+#                                                 CALLABLE FUNCTIONS
+#===================================================================================================================
 
+def get_coordinates(address):
+    geolocator = Nominatim(user_agent="gestionAnnonce")
+    location = geolocator.geocode(address)
+    latitude= location.latitude
+    longitude= location.longitude
+    print(location.address)
+    data= {
+        "lat": latitude,
+        "long": longitude
+    }
+    return data
 #===================================================================================================================
 #                                                 LOCATION TESTS
 #===================================================================================================================
@@ -174,3 +209,30 @@ def coordinates_location(request):
         "address":address
     }
     return Response(data)
+
+#===================================================================================================================
+#                                              INITIALIZING FUNCTION
+#===================================================================================================================
+import json
+
+
+@api_view(['GET'])
+def get_cities(request):
+    f=open('algeria_cities.json',encoding='UTF-8')
+    algeria_cities= json.load(f)
+    print(algeria_cities)
+    for commune in algeria_cities:
+        Wilaya.objects.get_or_create(
+                designation=commune["wilaya_name"]
+            )
+    for commune in algeria_cities:
+        Commune.objects.get_or_create(
+            designation=commune["commune_name"],
+            wilaya=Wilaya.objects.get(
+                designation=commune["wilaya_name"]
+            )
+        )
+    return Response({"bird":"duck"})
+
+
+

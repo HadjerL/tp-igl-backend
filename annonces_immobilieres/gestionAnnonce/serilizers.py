@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune , Location,AnnoncementImage
+from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune , Location,AnnoncementImage, Address
 
 #translate python to json
 
@@ -28,8 +28,8 @@ class AnnoncementImageSerializer(serializers.ModelSerializer):
 
 class AnnoceSerializer(serializers.ModelSerializer):
     images=AnnoncementImageSerializer(many=True, read_only=True)
-    type= TypeSerializer(many=False, read_only=True)
-    caregorie= CategorySerializer(many= False, read_only= True)
+    type= serializers.StringRelatedField(many=False, read_only=True)
+    caregorie= serializers.StringRelatedField(many= False, read_only= True)
     class Meta:
         model = Annonce
         fields = [
@@ -42,7 +42,8 @@ class AnnoceSerializer(serializers.ModelSerializer):
             'contact',
             'location',
             'type',
-            'images'
+            'creation_date',
+            'images',
             ]
 
 
@@ -61,11 +62,16 @@ class CommuneSerializer(serializers.ModelSerializer):
         fields = ['designation','wilaya']
         # gets the field designation from commune and locations related
 
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Address
+        fields= ['address','latitude','longitude','location']
 
 class LocationSerializer(serializers.ModelSerializer):
     wilaya= serializers.StringRelatedField(many=False, read_only=True)
     commune= serializers.StringRelatedField(many=False, read_only=True)
+    address= serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     class Meta:
         model = Location
-        fields = ['wilaya__designation','commune__designation','address']
+        fields = ['wilaya','commune','address']
     # gets all fields along with related announcements

@@ -7,6 +7,8 @@ router.register('announcement', views.viewsets_annoncement)
 router.register('type', views.viewsets_type)
 router.register('wilaya',views.viewsets_wilayas)
 router.register('commune',views.viewsets_commune)
+router.register('address',views.viewsets_address)
+router.register('location',views.viewsets_location)
 
 urlpatterns = [
     path('modify/<int:id>',views.modify_Announcement),
@@ -16,7 +18,8 @@ urlpatterns = [
     path('find_commune/<str:commune>',views.find_annocement_commune),
     path('find_category/<str:category>',views.find_annocement_category),
     path('',include(router.urls)),
-    path('location/',views.location_coordinates),
+    path('locations/',views.location_coordinates),
     path('coordinates/',views.coordinates_location),
+    path('duck/',views.get_cities)
 
 ]

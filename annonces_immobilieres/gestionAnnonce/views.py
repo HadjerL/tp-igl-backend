@@ -1,16 +1,12 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status,generics,viewsets ,filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer
-from .models import Annonce , Type,Contact,Caregorie,AnnoncementImage
+from .serilizers import AnnoceSerializer ,TypeSerializer,ContactSerializer,RegestierSerializer,tokenSerializer
+from .models import Annonce , Type,Contact,Caregorie,AnnoncementImage,User,Token
 
-# to view all announcements
-@api_view(['GET'])
-def consult_Announcements(request):
-    annonce= Annonce.objects.all()
-    serializer = AnnoceSerializer(annonce, many=True)
-    return Response(serializer.data)
+from rest_framework.permissions import AllowAny
+
 
 # to creat annoucement
 @api_view(['Post'])
@@ -40,15 +36,6 @@ def create_Annocement(request):
 
 
 
-# to view one announcement by id
-@api_view(['GET'])
-def consult_Announcement(request,_id):
-    try:
-        annonce= Annonce.objects.get(id=id)
-    except Annonce.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    serializer = AnnoceSerializer(annonce)
-    return Response(serializer.data)
 
 # to modify annoucement
 @api_view(['PUT'])
@@ -81,3 +68,28 @@ class viewsets_type(viewsets.ModelViewSet):
     serializer_class=TypeSerializer
     filter_backends=[filters.SearchFilter]
     search_fields=['nom_type']
+
+
+@api_view(['Post'])
+@permission_classes([AllowAny])
+def Login(request):
+    if User.objects.filter(email=request.data['email']).exists() :
+         token =Token.objects.get(user=User.objects.get(email=request.data['email']))
+         return Response(token.key) 
+    else :
+        User.objects.create(email=request.data['email'])
+        token =Token.objects.get(user=User.objects.get(email=request.data['email']))
+        return Response(token.key,status=status.HTTP_201_CREATED )
+        
+
+
+
+    
+class viewsets_login(viewsets.ModelViewSet):
+    queryset=User.objects.all()
+    serializer_class=RegestierSerializer
+
+class viewsets_token(viewsets.ModelViewSet):
+    queryset=Token.objects.all()
+    serializer_class=tokenSerializer
+

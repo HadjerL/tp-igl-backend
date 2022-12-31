@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune , Location,AnnoncementImage,User,Token
+from .models import Annoncement, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token
 
 #translate python to json
 
@@ -27,39 +27,55 @@ class AnnoncementImageSerializer(serializers.ModelSerializer):
 
 
 class AnnoceSerializer(serializers.ModelSerializer):
-    images=AnnoncementImageSerializer(many=True, read_only=True)
-    type= TypeSerializer(many=False, read_only=True)
-    caregorie= CategorySerializer(many= False, read_only= True)
+    images=serializers.StringRelatedField(many=True, read_only=True)
+    type= serializers.StringRelatedField(many=False, read_only=True)
+    caregorie= serializers.StringRelatedField(many= False, read_only= True)
+    user=serializers.PrimaryKeyRelatedField(many= False, read_only= True)
     class Meta:
-        model = Annonce
+        model = Annoncement
         fields = [
             'id',
+            'title',
             'caregorie',
+            'interface',
+            'prix',
+            'description',
+            'contact',
+            'location',
             'type',
-            'images'
+            'creation_date',
+            'images',
+            'user'
             ]
 
-class CommunSerializer(serializers.ModelSerializer):
-    model = Commune
-    fields = ['designation', 'location']
-    # gets the field designation from commune and locations related
-class WilayaSerializer(serializers.ModelSerializer):
-    model = Wilaya
-    fields = ['designation','location']
-    # gets the field designation from wilaya and location related
 
-class CommunSerializer(serializers.ModelSerializer):
-    model = Commune
-    fields = ['designation', 'location']
-    # gets the field designation from commune and locations related
 class WilayaSerializer(serializers.ModelSerializer):
-    model = Wilaya
-    fields = ['designation','location']
-    # gets the field designation from wilaya and location related
+    #targets the related field using its primaryKey
+    commune = serializers.StringRelatedField(many= True, read_only=True)
+    class Meta:
+        model = Wilaya
+        # gets the field designation from wilaya and all commune related
+        fields = ['designation','commune']
+
+class CommuneSerializer(serializers.ModelSerializer):
+    wilaya= serializers.StringRelatedField(many= False, read_only= True)
+    class Meta:
+        model = Commune
+        fields = ['designation','wilaya']
+        # gets the field designation from commune and locations related
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Address
+        fields= ['address','latitude','longitude','location']
 
 class LocationSerializer(serializers.ModelSerializer):
-    model = Location
-    fields = ['__all__','annonce']
+    wilaya= serializers.StringRelatedField(many=False, read_only=True)
+    commune= serializers.StringRelatedField(many=False, read_only=True)
+    address= serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    class Meta:
+        model = Location
+        fields = ['wilaya','commune','address']
     # gets all fields along with related announcements
 
 
@@ -67,11 +83,11 @@ class tokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Token
         fields = ['key']
-class RegestierSerializer(serializers.ModelSerializer):
-    key=tokenSerializer
+
+class UserSerializer(serializers.ModelSerializer):
+    annonce=serializers.PrimaryKeyRelatedField(many= False, read_only= True)
     class Meta:
         model = User
-        fields = ['email','key']
-    
-   
+        fields = ['email','annonce','last_login','date_joined','image ','first_name','family_name']
+
 

@@ -137,8 +137,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
     
-    def tokens(self):
-        return''
+
     
 
 #create token to each new user

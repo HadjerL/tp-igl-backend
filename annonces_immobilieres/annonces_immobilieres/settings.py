@@ -37,12 +37,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework.authtoken',#for token 
     'rest_framework',
     'smart_selects',    #for the chained forienkey 
     'phone_field',  #for phone number validation
     'gestionAnnonce.apps.GestionannonceConfig',
     
 ]
+REST_FRAMEWORK = {
+     'DEFAULT_AUTHENTICATION_CLASSES': 
+     ['rest_framework.authentication.TokenAuthentication'],
+     #globale authentication with token
+     'DEFAULT_PERMISSION_CLASSES':
+     ['rest_framework.permissions.IsAuthenticated'],
+
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -128,3 +137,4 @@ STATIC_URL = 'static/'
 
 #allows the usage of smart selcts
 USE_DJANGO_JQUERY = True
+AUTH_USER_MODEL = 'gestionAnnonce.User'

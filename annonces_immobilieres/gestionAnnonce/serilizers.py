@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune , Location,AnnoncementImage, Address
+from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token
 
 #translate python to json
 
@@ -75,3 +75,17 @@ class LocationSerializer(serializers.ModelSerializer):
         model = Location
         fields = ['wilaya','commune','address']
     # gets all fields along with related announcements
+
+
+class tokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Token
+        fields = ['key']
+
+class RegestierSerializer(serializers.ModelSerializer):
+    key=tokenSerializer
+    class Meta:
+        model = User
+        fields = ['email','key']
+
+

@@ -1,16 +1,18 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer
-from .models import Annonce, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya,Address
+from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,RegestierSerializer,tokenSerializer
+from .models import Annonce, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya,Address,User,Token
 import geopy.geocoders
 geopy.geocoders.options.default_timeout = 7
 from geopy.geocoders import Nominatim
-
+from rest_framework.permissions import AllowAny
 
 #===================================================================================================================
 #                                                 FILTERED QUERYSETS
 #===================================================================================================================
+
+
 
 @api_view(['GET'])
 def find_annocement_type(request,type):
@@ -234,5 +236,22 @@ def get_cities(request):
         )
     return Response({"bird":"duck"})
 
+@api_view(['Post'])
+@permission_classes([AllowAny])
+def Login(request):
+    if User.objects.filter(email=request.data['email']).exists() :
+        token =Token.objects.get(user=User.objects.get(email=request.data['email']))
+        return Response(token.key) 
+    else :
+        User.objects.create(email=request.data['email'])
+        token =Token.objects.get(user=User.objects.get(email=request.data['email']))
+        return Response(token.key,status=status.HTTP_201_CREATED )
 
+class viewsets_login(viewsets.ModelViewSet):
+    queryset=User.objects.all()
+    serializer_class=RegestierSerializer
+
+class viewsets_token(viewsets.ModelViewSet):
+    queryset=Token.objects.all()
+    serializer_class=tokenSerializer
 

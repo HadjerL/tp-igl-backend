@@ -10,6 +10,8 @@ router.register('commune',views.viewsets_commune)
 router.register('address',views.viewsets_address)
 router.register('location',views.viewsets_location)
 router.register('token', views.viewsets_token)
+router.register('message', views.viewsets_message)
+router.register('users', views.viewsets_user)
 
 urlpatterns = [
     path('modify/<int:id>',views.modify_Announcement),

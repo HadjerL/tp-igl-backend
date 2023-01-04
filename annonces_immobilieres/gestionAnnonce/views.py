@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,RegestierSerializer,tokenSerializer
-from .models import Annonce, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya,Address,User,Token
+from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,RegestierSerializer,tokenSerializer,MessageSerializer
+from .models import Annonce, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya,Address,User,Token,Message
 import geopy.geocoders
 geopy.geocoders.options.default_timeout = 7
 from geopy.geocoders import Nominatim
@@ -11,8 +11,6 @@ from rest_framework.permissions import AllowAny
 #===================================================================================================================
 #                                                 FILTERED QUERYSETS
 #===================================================================================================================
-
-
 
 @api_view(['GET'])
 def find_annocement_type(request,type):
@@ -89,6 +87,15 @@ class viewsets_location(viewsets.ModelViewSet):
     serializer_class= LocationSerializer
     search_fields=['address__address']
 
+class viewsets_message(viewsets.ModelViewSet):
+    queryset= Message.objects.all()
+    serializer_class= MessageSerializer
+    search_fields=['content','sent_by','sent_to']
+
+class viewsets_user(viewsets.ModelViewSet):
+    queryset= User.objects.all()
+    serializer_class= RegestierSerializer
+    search_fields=['content','sent_by','sent_to']
 
 #===================================================================================================================
 #                                                 UPDATING AND CREATING
@@ -254,4 +261,6 @@ class viewsets_login(viewsets.ModelViewSet):
 class viewsets_token(viewsets.ModelViewSet):
     queryset=Token.objects.all()
     serializer_class=tokenSerializer
+
+
 

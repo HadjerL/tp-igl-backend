@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token
+from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token,Message
 
 #translate python to json
 
@@ -82,10 +82,18 @@ class tokenSerializer(serializers.ModelSerializer):
         model = Token
         fields = ['key']
 
+class MessageSerializer(serializers.ModelSerializer):
+    sent_to= serializers.PrimaryKeyRelatedField(many= False, read_only= True)
+    sent_by= serializers.PrimaryKeyRelatedField(many= False, read_only= True)
+    class Meta:
+        model = Message
+        fields= ['content','sent_to','sent_by','send_date']
+
 class RegestierSerializer(serializers.ModelSerializer):
     key=tokenSerializer
     class Meta:
         model = User
-        fields = ['email','key']
+        fields = ['email','sent_messages','recieved_messages']
+
 
 

@@ -42,14 +42,13 @@ INSTALLED_APPS = [
     'smart_selects',    #for the chained forienkey 
     'phone_field',  #for phone number validation
     'gestionAnnonce.apps.GestionannonceConfig',
-    
 ]
 REST_FRAMEWORK = {
-     'DEFAULT_AUTHENTICATION_CLASSES': 
-     ['rest_framework.authentication.TokenAuthentication'],
-     #globale authentication with token
-     'DEFAULT_PERMISSION_CLASSES':
-     ['rest_framework.permissions.IsAuthenticated'],
+    'DEFAULT_AUTHENTICATION_CLASSES': 
+    ['rest_framework.authentication.TokenAuthentication'],
+    #globale authentication with token
+    # 'DEFAULT_PERMISSION_CLASSES':
+    # ['rest_framework.permissions.IsAuthenticated'],
 
 }
 

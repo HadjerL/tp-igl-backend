@@ -1,14 +1,11 @@
 from django.db import models
 from smart_selects.db_fields import ChainedForeignKey 
 from phone_field import PhoneField
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-from django.conf import settings
 from django.utils import timezone
 from datetime import datetime
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager,PermissionsMixin
-from django.core.validators import RegexValidator
+
 
 class Caregorie(models.Model):
     nom_cat = models.CharField(max_length=20)
@@ -27,17 +24,13 @@ class Contact(models.Model):
     tele = PhoneField()
     def __str__(self):
         return self.prenom
-
-
 # Location = wilaya + communes + address
 # wilaya = commune+
 #address= address + coordinates
-
 class Wilaya(models.Model):
     designation = models.CharField(max_length=35, unique=True)
     def __str__(self):
         return self.designation
-
 
 class Commune(models.Model):
     designation = models.CharField(max_length=35)
@@ -56,7 +49,6 @@ class Address(models.Model):
     longitude= models.DecimalField(decimal_places=7, max_digits= 10)
     def __str__(self):
         return self.address
-
 
 class Location(models.Model):
     wilaya = models.ForeignKey( #each localization has one wilaya
@@ -109,19 +101,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now=True)
     last_login = models.DateTimeField(null=True, blank=True)
-    image = models.ImageField(blank = True, null=True)
+    image = models.ImageField(blank = True, null=True,upload_to="images/photo%y%m%d",)
     objects = UserManager()
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = []
     def __str__(self):
         return self.email
-
-#create token to each new user
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
 
 class Annoncement(models.Model):
     title= models.CharField(max_length=35, default='')
@@ -162,6 +148,13 @@ class Annoncement(models.Model):
         on_delete=models.CASCADE,
         )
     
+    
+    favorated_by = models.ManyToManyField(
+        User,
+        default='',
+        related_name='favorite',
+    )
+    
 
     def __str__(self):
         return self.title
@@ -173,7 +166,7 @@ class AnnoncementImage(models.Model):
         on_delete=models.CASCADE,
         )
     image =models.ImageField(
-        upload_to="photo%y%m%d",
+        upload_to="images/photo%y%m%d",
         blank=True,
         null=True,
         )

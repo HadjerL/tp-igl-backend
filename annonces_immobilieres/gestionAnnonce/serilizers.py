@@ -30,7 +30,6 @@ class AnnoceSerializer(serializers.ModelSerializer):
     images=serializers.StringRelatedField(many=True, read_only=True)
     type= serializers.StringRelatedField(many=False, read_only=True)
     caregorie= serializers.StringRelatedField(many= False, read_only= True)
-    user=serializers.PrimaryKeyRelatedField(many= False, read_only= True)
     class Meta:
         model = Annoncement
         fields = [
@@ -45,7 +44,6 @@ class AnnoceSerializer(serializers.ModelSerializer):
             'type',
             'creation_date',
             'images',
-            'user'
             'favorated_by'
 
             ]
@@ -87,10 +85,9 @@ class tokenSerializer(serializers.ModelSerializer):
         fields = ['key']
 
 class UserSerializer(serializers.ModelSerializer):
-    annonce=serializers.PrimaryKeyRelatedField(many= False, read_only= True)
     favorite=serializers.PrimaryKeyRelatedField(many= True, read_only= True)
     class Meta:
         model = User
-        fields = ['email','annonce','last_login','date_joined','image ','first_name','family_name','favorite']
+        fields = ['id','email','last_login','date_joined','image','first_name','family_name','favorite']
 
 

@@ -19,6 +19,12 @@ urlpatterns = [
     path('find_wilaya/<str:wilaya>',views.find_annocement_wilaya),
     path('find_commune/<str:commune>',views.find_annocement_commune),
     path('find_category/<str:category>',views.find_annocement_category),
+    path('all_announcement/',views.all_announcemnt),
+    path('delete_announcement/<int:id>',views.delete_announcemnt),
+    path('find_user',views.find_user),
+    path('add_favorate',views.add_favorate),
+    path('remove_favorate',views.remove_favorate),
+    path('search_filter',views.search_filter),
     path('login/',views.Login ),
     path('',include(router.urls)),
 

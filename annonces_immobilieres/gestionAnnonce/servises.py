@@ -10,6 +10,8 @@ from django.dispatch import receiver
 from django.conf import settings
 geopy.geocoders.options.default_timeout = 7
 import json
+import django_filters
+from django.db.models import Q
 
 
 
@@ -79,6 +81,11 @@ class LocationManager():
         return(location)
 
 class AuthManager(Iauth):
+    #create token to each new user
+    @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+    def create_auth_token(sender, instance=None, created=False, **kwargs):
+        if created:
+            Token.objects.create(user=instance)
     
     def login(email,family_name ,first_name,image):
         if User.objects.filter(email=email).exists() :
@@ -92,13 +99,13 @@ class AuthManager(Iauth):
                 return (token.key )
             else :
                 raise ValueError
+    def find_user(token):
+        mail= (Token.objects.get(key=token)).user
+        return(User.objects.get(email=mail))
 
-class AnnouncemntManager (Iannouncement):
-    #create token to each new user
-    @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-    def create_auth_token(sender, instance=None, created=False, **kwargs):
-        if created:
-            Token.objects.create(user=instance)
+
+class AnnouncemntManager ():
+
     def create_Announcement(title:str,area:int,price:int,description:str,id_category:int,id_type:int,id_user:int,name:str,last_name:str,personal_address:str,phone:str,id_commune:int,id_wilaya:int,address:str,uploaded_images):
         try:
             category= Caregorie.objects.get(id=id_category)
@@ -106,6 +113,7 @@ class AnnouncemntManager (Iannouncement):
             user=User.objects.get(id=id_user)
         except Caregorie.DoesNotExist or Type.DoesNotExist or User.DoesNotExist :
             raise ValueError
+        
         annonce = Annoncement.objects.create(
         title= title,
         caregorie= category,
@@ -114,6 +122,7 @@ class AnnouncemntManager (Iannouncement):
         interface= area,
         prix=price,
         description= description,
+        deleted =False,
         contact=Contact.objects.create(
             nom= name,
             prenom= last_name,
@@ -135,6 +144,8 @@ class AnnouncemntManager (Iannouncement):
             contact= Contact.objects.get(id=announcement.contact.pk)
         except Caregorie.DoesNotExist or Type.DoesNotExist or Annoncement.DoesNotExist or Contact.DoesNotExist :
                 raise ValueError
+        if announcement.deleted ==True :
+            raise ValueError
         announcement.title= title
         announcement.caregorie= category
         announcement.type= type
@@ -149,8 +160,51 @@ class AnnouncemntManager (Iannouncement):
         announcement.location=LocationManager.modifyLocation(announcement,id_wilaya,id_commune,adress)
         announcement.save()
         return(announcement)
+    
+    def delete_announcement(id):
+        announcement= Annoncement.objects.get(id=id)
+        if announcement.deleted ==True :
+            raise ValueError
+        else:
+            announcement.deleted =True
+            announcement.save()
+        return ()
+    
+    def get_announcements():
+        return (Annoncement.objects.filter(deleted=False))
+    
+    def search_filter(search,category,commune,wilaya,type,first_date,second_date):
+        annonce = Annoncement.objects.filter(deleted=False)
+        if search=="" and category=="" and commune=="" and wilaya=="":
+            return (annonce)
+        elif search=="" :
+            annonce = annonce.filter(Q(caregorie__id__in=category) | Q (location__commune__id__in=commune ) | Q( location__wilaya__id__in= wilaya) | Q(type__id__in= type) |Q(creation_date__range=[first_date,second_date ] )) 
+            return(annonce)
+        else :
+            annoncement = Annoncement.objects
+            for keyword in search:
+                annoncement = annoncement or annonce.filter(( Q(description__contains=keyword)) | Q(title__contains=keyword))
+            
+            annoncement = annoncement.filter(Q(caregorie__id__in=category) | Q (location__commune__id__in=commune ) | Q( location__wilaya__id__in= wilaya) | Q(type__id__in= type)|Q(creation_date__range=[first_date,second_date ] ) )
+            return (annoncement)
+        
+
+            
+
+  
 
 class MessagManager():
     pass
 
+class FavoriteManager():
+    def add_favorate(id_user,id_announcement):
+        announcement = Annoncement.objects.get(id=id_announcement)
+        user =User.objects.get(id=id_user)
+        announcement.favorated_by.add(user.id)
 
+    def remove_favorate(id_user,id_announcement):
+        announcement = Annoncement.objects.get(id=id_announcement)
+        user =User.objects.get(id=id_user)
+        announcement.favorated_by.remove(user.id)
+       
+        return ()

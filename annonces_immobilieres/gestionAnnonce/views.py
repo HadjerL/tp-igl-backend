@@ -1,11 +1,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer
+from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,UserSerializer
 from .models import Annoncement, Type, Commune, Location, Wilaya,Address
-import geopy.geocoders
-geopy.geocoders.options.default_timeout = 7
-from geopy.geocoders import Nominatim
 from rest_framework.permissions import AllowAny
 from gestionAnnonce import servises
 
@@ -21,7 +18,6 @@ def user_annocement(request,id):
         )
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
-
 
 @api_view(['GET'])
 def find_annocement_type(request,type):
@@ -147,37 +143,51 @@ def modify_Announcement(request,id):
         )
     serializer= AnnoceSerializer(annoncement)
     return Response(serializer.data,status=status.HTTP_201_CREATED) 
-    
-        
-
-
-
-#===================================================================================================================
-#                                              INITIALIZING FUNCTION
-#===================================================================================================================
-import json
-@api_view(['GET'])
-def get_cities(request):
-    f=open('algeria_cities.json',encoding='UTF-8')
-    algeria_cities= json.load(f)
-    print(algeria_cities)
-    for commune in algeria_cities:
-        Wilaya.objects.get_or_create(
-                designation=commune["wilaya_name"]
-            )
-    for commune in algeria_cities:
-        Commune.objects.get_or_create(
-            designation=commune["commune_name"],
-            wilaya=Wilaya.objects.get(
-                designation=commune["wilaya_name"]
-            )
-        )
-    return Response({"bird":"duck"})
-
-
 
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def Login(request):
     return Response(servises.AuthManager.login(request.data["email"],request.data["first_name"],request.data["first_name"],request.data["image"]))
-   
+
+
+@api_view(['GET'])
+def all_announcemnt(request):
+    annonce =servises.AnnouncemntManager.get_announcements()
+    serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET']) 
+def delete_announcemnt(request,id):   
+    servises.AnnouncemntManager.delete_announcement(id)
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET']) 
+def find_user(request):
+    user =servises.AuthManager.find_user(request.data["token"])
+    serializer=UserSerializer(user ,many=False)
+    return Response(serializer.data)
+
+@api_view(['post'])
+def add_favorate(request):
+    servises.FavoriteManager.add_favorate(request.data["id_user"],request.data["id_announcement"])
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['post'])
+def remove_favorate(request):
+    servises.FavoriteManager.remove_favorate(request.data["id_user"],request.data["id_announcement"])
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def search_filter(request) :
+    annonce = servises.AnnouncemntManager.search_filter(
+        request.data["search"],
+        request.data["category"],
+        request.data["commune"],
+        request.data["wilaya"],
+        request.data["type"],
+        request.data["first_date"],
+        request.data["second_date"],)
+    serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)

@@ -1,11 +1,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,MessageSerializer, UserSerializer
-from .models import Annoncement, Type, Commune, Location, Wilaya, Address, Messages, User
-import geopy.geocoders
-geopy.geocoders.options.default_timeout = 7
-from geopy.geocoders import Nominatim
+from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,UserSerializer, MessageSerializer
+from .models import Annoncement, Type, Commune, Location, Wilaya,Address, Messages, User
 from rest_framework.permissions import AllowAny
 from gestionAnnonce import servises
 from django.shortcuts import get_object_or_404
@@ -22,7 +19,6 @@ def user_annocement(request,id):
         )
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
-
 
 @api_view(['GET'])
 def find_annocement_type(request,type):
@@ -113,11 +109,6 @@ class viewsets_message(viewsets.ModelViewSet):
         serializer = MessageSerializer(user)
         return Response(serializer.data)
 
-class viewsets_user(viewsets.ModelViewSet):
-    queryset= User.objects.all()
-    serializer_class= UserSerializer
-    search_fields=['content','sent_by','sent_to']
-
 #===================================================================================================================
 #                                                 UPDATING AND CREATING
 #===================================================================================================================
@@ -178,12 +169,47 @@ def send_message(request):
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def Login(request):
-    return Response(servises.AuthManager.login(request.data["email"],request.data["family_name"],request.data["first_name"],request.data["image"]))
-
+    return Response(servises.AuthManager.login(request.data["email"],request.data["first_name"],request.data["first_name"],request.data["image"]))
 
 
 @api_view(['GET'])
-def sample_view(request):
-    current_user = request.user
-    print (current_user)
-    return Response({"batta":"bird"})
+def all_announcemnt(request):
+    annonce =servises.AnnouncemntManager.get_announcements()
+    serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET']) 
+def delete_announcemnt(request,id):   
+    servises.AnnouncemntManager.delete_announcement(id)
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET']) 
+def find_user(request):
+    user =servises.AuthManager.find_user(request.data["token"])
+    serializer=UserSerializer(user ,many=False)
+    return Response(serializer.data)
+
+@api_view(['post'])
+def add_favorate(request):
+    servises.FavoriteManager.add_favorate(request.data["id_user"],request.data["id_announcement"])
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['post'])
+def remove_favorate(request):
+    servises.FavoriteManager.remove_favorate(request.data["id_user"],request.data["id_announcement"])
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def search_filter(request) :
+    annonce = servises.AnnouncemntManager.search_filter(
+        request.data["search"],
+        request.data["category"],
+        request.data["commune"],
+        request.data["wilaya"],
+        request.data["type"],
+        request.data["first_date"],
+        request.data["second_date"],)
+    serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)

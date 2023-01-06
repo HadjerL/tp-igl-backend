@@ -31,7 +31,6 @@ class AnnoceSerializer(serializers.ModelSerializer):
     images=serializers.StringRelatedField(many=True, read_only=True)
     type= serializers.StringRelatedField(many=False, read_only=True)
     caregorie= serializers.StringRelatedField(many= False, read_only= True)
-    user=serializers.PrimaryKeyRelatedField(many= False, read_only= True)
     class Meta:
         model = Annoncement
         fields = [

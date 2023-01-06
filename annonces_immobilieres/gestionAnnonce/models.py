@@ -7,6 +7,9 @@ from datetime import datetime
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager,PermissionsMixin
 
 
+
+
+
 class Caregorie(models.Model):
     nom_cat = models.CharField(max_length=20)
     def __str__(self):
@@ -111,6 +114,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Annoncement(models.Model):
     title= models.CharField(max_length=35, default='')
+    deleted = models.BooleanField(default=False)
     caregorie = models.ForeignKey(
         Caregorie,
         default='',
@@ -153,7 +157,9 @@ class Annoncement(models.Model):
         User,
         default='',
         related_name='favorite',
+    
     )
+    
     
 
     def __str__(self):

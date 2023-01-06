@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Annoncement, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token, Message
+from .models import Annoncement, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token, Messages
+from .servises import MessagManager
 
 #translate python to json
 
@@ -45,9 +46,8 @@ class AnnoceSerializer(serializers.ModelSerializer):
             'type',
             'creation_date',
             'images',
-            'user'
-            'favorated_by'
-
+            'user',
+            'favorated_by',
             ]
 
 
@@ -86,18 +86,39 @@ class tokenSerializer(serializers.ModelSerializer):
         model = Token
         fields = ['key']
 
+
 class MessageSerializer(serializers.ModelSerializer):
     sent_to= serializers.PrimaryKeyRelatedField(many= False, read_only= True)
     sent_by= serializers.PrimaryKeyRelatedField(many= False, read_only= True)
     class Meta:
-        model = Message
-        fields= ['content','sent_to','sent_by','send_date']
+        model = Messages
+        fields= ['content','sent_to','sent_by','created_at','status']
+
 
 class UserSerializer(serializers.ModelSerializer):
-    annonce=serializers.PrimaryKeyRelatedField(many= False, read_only= True)
-    favorite=serializers.PrimaryKeyRelatedField(many= True, read_only= True)
+    total_sent_messages=serializers.IntegerField(source='sent_messages.count',read_only=True)
+    total_recieved_messages=serializers.IntegerField(source='recieved_messages.count',read_only=True)
+    unread = serializers.SerializerMethodField()
+    def get_unread(self, user):
+        return MessagManager.unread_messages(user)
+
+
     class Meta:
         model = User
-        fields = ['email','annonce','last_login','date_joined','image ','first_name','family_name','favorite','sent_messages','recieved_messages']
+        fields = [
+            'email',
+            'annonce',
+            'last_login',
+            'date_joined',
+            'image',
+            'first_name',
+            'family_name',
+            'favorite',
+            'sent_messages',
+            'recieved_messages',
+            'total_sent_messages',
+            'total_recieved_messages',
+            'unread'
+        ]
 
 

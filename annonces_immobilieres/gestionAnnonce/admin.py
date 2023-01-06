@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Annoncement, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, User, Address, Message
+from .models import Annoncement, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, User, Address, Messages
 # Registering models here.
 
 
@@ -15,4 +15,4 @@ admin.site.register(Location)
 admin.site.register(AnnoncementImage)
 admin.site.register(Address)
 admin.site.register(User)
-admin.site.register(Message)
+admin.site.register(Messages)

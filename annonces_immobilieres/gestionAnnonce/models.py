@@ -173,7 +173,12 @@ class AnnoncementImage(models.Model):
     def __str__(self):
         return self.image.url
 
-class Message(models.Model):
+class Messages(models.Model):
+    STATUS=[
+        ('Pending','Pending'),
+        ('Read','Read')
+    ]
+
     content = models.TextField()
     sent_to= models.ForeignKey(
         User,
@@ -187,6 +192,7 @@ class Message(models.Model):
         related_name='sent_messages',
         on_delete=models.PROTECT
         )
-    send_date = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now=True)
+    status= models.CharField(max_length=15, choices=STATUS, default='Pending')
     def __str__(self):
         return self.content

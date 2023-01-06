@@ -2,12 +2,13 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
 from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,MessageSerializer, UserSerializer
-from .models import Annoncement, Type, Commune, Location, Wilaya, Address, Message, User
+from .models import Annoncement, Type, Commune, Location, Wilaya, Address, Messages, User
 import geopy.geocoders
 geopy.geocoders.options.default_timeout = 7
 from geopy.geocoders import Nominatim
 from rest_framework.permissions import AllowAny
 from gestionAnnonce import servises
+from django.shortcuts import get_object_or_404
 
 #===================================================================================================================
 #                                                 FILTERED QUERYSETS
@@ -60,7 +61,7 @@ def find_annocement_category(request,category):
 #===================================================================================================================
 
 class viewsets_annoncement(viewsets.ModelViewSet):
-    queryset=Annoncement.objects.all()
+    queryset=Annoncement.objects.all().order_by('creation_date')
     serializer_class=AnnoceSerializer
     filter_backends=[filters.SearchFilter]
     search_fields=['type__nom_type',
@@ -70,6 +71,7 @@ class viewsets_annoncement(viewsets.ModelViewSet):
     'description',
     'title'
     ]
+    
 
 class viewsets_wilayas(viewsets.ModelViewSet):
     queryset=Wilaya.objects.all()
@@ -99,9 +101,17 @@ class viewsets_location(viewsets.ModelViewSet):
     search_fields=['address__address']
 
 class viewsets_message(viewsets.ModelViewSet):
-    queryset= Message.objects.all()
+    queryset= Messages.objects.all()
     serializer_class= MessageSerializer
     search_fields=['content','sent_by','sent_to']
+
+    def retrieve(self, request, pk=None):
+        queryset = Messages.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        user.status='Read'
+        user.save()
+        serializer = MessageSerializer(user)
+        return Response(serializer.data)
 
 class viewsets_user(viewsets.ModelViewSet):
     queryset= User.objects.all()
@@ -154,36 +164,26 @@ def modify_Announcement(request,id):
         )
     serializer= AnnoceSerializer(annoncement)
     return Response(serializer.data,status=status.HTTP_201_CREATED) 
-    
-        
 
-
-
-#===================================================================================================================
-#                                              INITIALIZING FUNCTION
-#===================================================================================================================
-import json
-@api_view(['GET'])
-def get_cities(request):
-    f=open('algeria_cities.json',encoding='UTF-8')
-    algeria_cities= json.load(f)
-    print(algeria_cities)
-    for commune in algeria_cities:
-        Wilaya.objects.get_or_create(
-                designation=commune["wilaya_name"]
-            )
-    for commune in algeria_cities:
-        Commune.objects.get_or_create(
-            designation=commune["commune_name"],
-            wilaya=Wilaya.objects.get(
-                designation=commune["wilaya_name"]
-            )
-        )
-    return Response({"bird":"duck"})
-
-
+@api_view(['POST'])
+def send_message(request):
+    message= servises.MessagManager.send_message(
+        request.data['sent_by'],
+        request.data['sent_to'],
+        request.data['content']
+    )
+    serializer= MessageSerializer(message)
+    return Response(serializer.data, status= status.HTTP_201_CREATED)
 
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def Login(request):
-    return Response(servises.AuthManager.login(request.data["email"],request.data["first_name"],request.data["first_name"],request.data["image"]))
+    return Response(servises.AuthManager.login(request.data["email"],request.data["family_name"],request.data["first_name"],request.data["image"]))
+
+
+
+@api_view(['GET'])
+def sample_view(request):
+    current_user = request.user
+    print (current_user)
+    return Response({"batta":"bird"})

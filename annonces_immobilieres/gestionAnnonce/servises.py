@@ -1,6 +1,6 @@
 
 
-from .models import Annoncement, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya,Address,User,Token
+from .models import Annoncement, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya,Address,User,Token, Messages
 from .interface import Iannouncement,Iauth
 from geopy.geocoders import Nominatim
 from validate_email import validate_email
@@ -32,9 +32,8 @@ class LocationManager():
             designation=commune["wilaya_name"]
         )
     )
-    get_cities()
-    del get_cities
-
+    # get_cities()
+    # del get_cities
 
     def get_coordinates(address):
         geolocator = Nominatim(user_agent="gestionAnnonce")
@@ -46,7 +45,8 @@ class LocationManager():
             "lat": latitude,
             "long": longitude
         }
-        return data    
+        return data   
+
     def modifyLocation(announcement:Annoncement,id_wilaya:int,id_commune:int,addres:str):
         try:
             location= Location.objects.get(id=announcement.location.pk)
@@ -61,6 +61,7 @@ class LocationManager():
         address.latitude=LocationManager.get_coordinates(address)["lat"]
         address.longitude=LocationManager.get_coordinates(address)["long"]
         return(location)
+
     def creatLocation(id_commune:int,id_wilaya:int,address):
         try:
             wilaya= Wilaya.objects.get(id=id_wilaya)
@@ -78,6 +79,8 @@ class LocationManager():
         )
         return(location)
 
+
+
 class AuthManager(Iauth):
     
     def login(email,family_name ,first_name,image):
@@ -92,6 +95,21 @@ class AuthManager(Iauth):
                 return (token.key )
             else :
                 raise ValueError
+    
+    def get_my_messages(user_id):
+        try:
+            my_messages= Messages.objects.filter(sent_to=user_id)
+        except Messages.DoesNotExist:
+            raise ValueError
+        return my_messages
+    
+    def get_sent_messages(user_id):
+        try:
+            sent_messages= Messages.objects.filter(sent_by=user_id)
+        except Messages.DoesNotExist:
+            raise ValueError
+        return sent_messages
+
 
 class AnnouncemntManager (Iannouncement):
     #create token to each new user
@@ -99,6 +117,8 @@ class AnnouncemntManager (Iannouncement):
     def create_auth_token(sender, instance=None, created=False, **kwargs):
         if created:
             Token.objects.create(user=instance)
+
+    #creates a new announcemet
     def create_Announcement(title:str,area:int,price:int,description:str,id_category:int,id_type:int,id_user:int,name:str,last_name:str,personal_address:str,phone:str,id_commune:int,id_wilaya:int,address:str,uploaded_images):
         try:
             category= Caregorie.objects.get(id=id_category)
@@ -124,7 +144,6 @@ class AnnouncemntManager (Iannouncement):
         )
         for img in uploaded_images:
             AnnoncementImage.objects.create(annoncement =annonce,image=img)
-   
         return(annonce)
 
     def modify_Announcement(title:str,area:int,price:int,description:str,id_category:int,id_type:int,name:str,last_name:str,personal_address:str,phone:str,id_wilaya:int,id_commune:int,id_announcement:int,adress:str):
@@ -150,7 +169,26 @@ class AnnouncemntManager (Iannouncement):
         announcement.save()
         return(announcement)
 
+
+
 class MessagManager():
+
+    # ========COUNTER==========
+    # *) Unread recieved messages to a certain user
+    def unread_messages(id_user):
+        return Messages.objects.filter(status= 'Pending',sent_to=id_user).count()
+
+    def send_message(sending_user: str, recieving_user: str, content:str):
+        try:
+            sent_by= User.objects.get(email=sending_user)
+            sent_to= User.objects.get(email=recieving_user)
+        except User.DoesNotExist:
+            raise ValueError
+        Messages.objects.create(
+            content=content,
+            sent_by=sent_by,
+            sent_to=sent_to,
+        )
     pass
 
 

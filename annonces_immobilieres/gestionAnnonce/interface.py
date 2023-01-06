@@ -24,5 +24,8 @@ class Iauth(abc.ABC):
     @abc.abstractmethod
     def create_auth_token():
         pass
+    @abc.abstractmethod
+    def get_my_messages():
+        pass
 
 

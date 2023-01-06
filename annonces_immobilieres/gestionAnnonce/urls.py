@@ -10,6 +10,7 @@ router.register('commune',views.viewsets_commune)
 router.register('address',views.viewsets_address)
 router.register('location',views.viewsets_location)
 router.register('message', views.viewsets_message)
+router.register('user', views.viewsets_user)
 
 urlpatterns = [
     path('modify/<int:id>',views.modify_Announcement),
@@ -20,6 +21,8 @@ urlpatterns = [
     path('find_commune/<str:commune>',views.find_annocement_commune),
     path('find_category/<str:category>',views.find_annocement_category),
     path('login/',views.Login ),
+    path('send_message/',views.send_message),
+    path('try/',views.sample_view),
     path('',include(router.urls)),
 
 ]

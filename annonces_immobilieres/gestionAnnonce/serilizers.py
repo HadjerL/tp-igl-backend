@@ -27,30 +27,6 @@ class AnnoncementImageSerializer(serializers.ModelSerializer):
         fields = ["id", "image", "annoncement"]
 
 
-class AnnoceSerializer(serializers.ModelSerializer):
-    images=serializers.StringRelatedField(many=True, read_only=True)
-    type= serializers.StringRelatedField(many=False, read_only=True)
-    caregorie= serializers.StringRelatedField(many= False, read_only= True)
-    class Meta:
-        model = Annoncement
-        fields = [
-            'id',
-            'title',
-            'caregorie',
-            'interface',
-            'prix',
-            'description',
-            'contact',
-            'location',
-            'type',
-            'creation_date',
-            'images',
-            'user',
-            'favorated_by',
-            'deleted'
-            ]
-
-
 class WilayaSerializer(serializers.ModelSerializer):
     #targets the related field using its primaryKey
     commune = serializers.StringRelatedField(many= True, read_only=True)
@@ -74,11 +50,37 @@ class AddressSerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     wilaya= serializers.StringRelatedField(many=False, read_only=True)
     commune= serializers.StringRelatedField(many=False, read_only=True)
-    address= serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    address= AddressSerializer(many=False, read_only=True)
     class Meta:
         model = Location
         fields = ['wilaya','commune','address']
     # gets all fields along with related announcements
+
+class AnnoceSerializer(serializers.ModelSerializer):
+    images=serializers.StringRelatedField(many=True, read_only=True)
+    type= serializers.StringRelatedField(many=False, read_only=True)
+    caregorie= serializers.StringRelatedField(many= False, read_only= True)
+    location= LocationSerializer(many=False, read_only=True)
+    class Meta:
+        model = Annoncement
+        fields = [
+            'id',
+            'title',
+            'caregorie',
+            'interface',
+            'prix',
+            'description',
+            'contact',
+            'location',
+            'type',
+            'creation_date',
+            'images',
+            'user',
+            'favorated_by',
+            'deleted'
+            ]
+
+
 
 
 class tokenSerializer(serializers.ModelSerializer):

@@ -109,7 +109,7 @@ class AuthManager(Iauth):
 
 
 
-class AnnouncemntManager ():
+class AnnouncemntManager (Iannouncement):
 
     def create_Announcement(title:str,area:int,price:int,description:str,id_category:int,id_type:int,id_user:int,name:str,last_name:str,personal_address:str,phone:str,id_commune:int,id_wilaya:int,address:str,uploaded_images):
         try:
@@ -179,18 +179,36 @@ class AnnouncemntManager ():
     
     def search_filter(search,category,commune,wilaya,type,first_date,second_date):
         annonce = Annoncement.objects.filter(deleted=False)
-        if search=="" and category=="" and commune=="" and wilaya=="":
-            return (annonce)
-        elif search=="" :
-            annonce = annonce.filter(Q(caregorie__id__in=category) | Q (location__commune__id__in=commune ) | Q( location__wilaya__id__in= wilaya) | Q(type__id__in= type) |Q(creation_date__range=[first_date,second_date ] )) 
-            return(annonce)
-        else :
-            annoncement = Annoncement.objects
+        m=["imane","h"]
+        if search != "":
+            annoncement = []
             for keyword in search:
-                annoncement = annoncement or annonce.filter(( Q(description__contains=keyword)) | Q(title__contains=keyword))
-            
-            annoncement = annoncement.filter(Q(caregorie__id__in=category) | Q (location__commune__id__in=commune ) | Q( location__wilaya__id__in= wilaya) | Q(type__id__in= type)|Q(creation_date__range=[first_date,second_date ] ) )
-            return (annoncement)
+                annoncement = annoncement or annonce.filter(Q(description__contains=keyword) | Q(title__contains=keyword))
+            if category != "" or commune != "" or wilaya!="" or type !="" :
+                if first_date !="" and  second_date !="":
+                    annoncement = annoncement.filter(Q(caregorie__id__in=category) | Q (location__commune__id__in=commune ) | Q( location__wilaya__id__in= wilaya) | Q(type__id__in= type)|Q(creation_date__range=[first_date,second_date ] ) )
+                    return (annoncement)
+                elif first_date =="" and  second_date =="" :
+                    annoncement = annoncement.filter( Q(caregorie__id__in=category) | Q (location__commune__id__in=commune ) | Q( location__wilaya__id__in= wilaya) | Q(type__id__in= type) )
+                    return (annoncement)
+                else:
+                    raise ValueError
+            else:
+                return (annoncement)
+
+        else :
+            if category != "" or commune != "" or wilaya!="" or type !="" :
+                if first_date !="" and  second_date !="" :
+                    annonce = annonce.filter(caregorie__id__in=category ,location__commune__id__in=commune , location__wilaya__id__in= wilaya ,type__id__in= type,creation_date__range=[first_date,second_date ] ) 
+                    return(annonce)
+                elif first_date =="" and  second_date =="" :
+                    annonce = annonce.filter(caregorie__id__in=category ,location__commune__id__in=commune ,location__wilaya__id__in= wilaya,type__id__in= type) 
+                    return(annonce)
+                else :
+                    raise ValueError
+            else:
+                return(annonce)
+        
 
 
 
@@ -233,19 +251,19 @@ class MessagManager():
 
 class FavoriteManager():
     def add_favorate(id_user,id_announcement):
-        announcement = Annoncement.objects.get(id=id_announcement)
+        announcement = Annoncement.objects.get(id=id_announcement,deleted=False)
         user =User.objects.get(id=id_user)
         announcement.favorated_by.add(user.id)
 
     def remove_favorate(id_user,id_announcement):
-        announcement = Annoncement.objects.get(id=id_announcement)
+        announcement = Annoncement.objects.get(id=id_announcement,deleted=False)
         user =User.objects.get(id=id_user)
         announcement.favorated_by.remove(user.id)
         return ()
 
     def get_my_favorites(user_id):
         try:
-            my_fav= Annoncement.objects.filter(favorated_by=user_id)
+            my_fav= Annoncement.objects.filter(favorated_by=user_id,deleted=False)
         except Annoncement.DoesNotExist:
             raise ValueError
         return my_fav

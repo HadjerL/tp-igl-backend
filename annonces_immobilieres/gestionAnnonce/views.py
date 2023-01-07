@@ -128,7 +128,7 @@ def create_Annocement(request):
         request.data['description'],
         request.data['id_category'],
         request.data['id_type'],
-        request.data['id_user'],
+        request.user.id,
         request.data["name"],
         request.data["last_name"],
         request.data["personal_address"],
@@ -198,16 +198,16 @@ def find_user(request):
 
 @api_view(['post'])
 def add_favorate(request):
-    servises.FavoriteManager.add_favorate(request.data["id_user"],request.data["id_announcement"])
+    servises.FavoriteManager.add_favorate(request.user.id,request.data["id_announcement"])
     return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['post'])
 def remove_favorate(request):
-    servises.FavoriteManager.remove_favorate(request.data["id_user"],request.data["id_announcement"])
+    servises.FavoriteManager.remove_favorate(request.user.id,request.data["id_announcement"])
     return Response(status=status.HTTP_200_OK)
 
-@api_view(['GET'])
+@api_view(['POST'])
 def search_filter(request) :
     annonce = servises.AnnouncemntManager.search_filter(
         request.data["search"],

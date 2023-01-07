@@ -47,6 +47,7 @@ class AnnoceSerializer(serializers.ModelSerializer):
             'images',
             'user',
             'favorated_by',
+            'deleted'
             ]
 
 
@@ -95,13 +96,6 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    total_sent_messages=serializers.IntegerField(source='sent_messages.count',read_only=True)
-    total_recieved_messages=serializers.IntegerField(source='recieved_messages.count',read_only=True)
-    unread = serializers.SerializerMethodField()
-    def get_unread(self, user):
-        return MessagManager.unread_messages(user)
-
-
     class Meta:
         model = User
         fields = [
@@ -113,11 +107,6 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'family_name',
             'favorite',
-            'sent_messages',
-            'recieved_messages',
-            'total_sent_messages',
-            'total_recieved_messages',
-            'unread'
         ]
 
 

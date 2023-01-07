@@ -201,6 +201,7 @@ class MessagManager():
     def unread_messages(id_user):
         return Messages.objects.filter(status= 'Pending',sent_to=id_user).count()
 
+    # *) creates a new message
     def send_message(sending_user: str, recieving_user: str, content:str):
         try:
             sent_by= User.objects.get(email=sending_user)
@@ -213,13 +214,15 @@ class MessagManager():
             sent_to=sent_to,
         )
 
+    # *) Gets messges logged user recieved messages
     def get_my_messages(user_id):
         try:
             my_messages= Messages.objects.filter(sent_to=user_id)
         except Messages.DoesNotExist:
             raise ValueError
         return my_messages
-    
+
+    # *) Gets logged user sent messages
     def get_sent_messages(user_id):
         try:
             sent_messages= Messages.objects.filter(sent_by=user_id)
@@ -239,3 +242,10 @@ class FavoriteManager():
         user =User.objects.get(id=id_user)
         announcement.favorated_by.remove(user.id)
         return ()
+
+    def get_my_favorites(user_id):
+        try:
+            my_fav= Annoncement.objects.filter(favorated_by=user_id)
+        except Annoncement.DoesNotExist:
+            raise ValueError
+        return my_fav

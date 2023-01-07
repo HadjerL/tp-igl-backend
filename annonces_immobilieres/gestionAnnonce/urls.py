@@ -3,13 +3,14 @@ from gestionAnnonce import views
 from rest_framework.routers import DefaultRouter
 
 router =DefaultRouter()
-router.register('announcement', views.viewsets_annoncement)
-router.register('type', views.viewsets_type)
-router.register('wilaya',views.viewsets_wilayas)
-router.register('commune',views.viewsets_commune)
-router.register('address',views.viewsets_address)
-router.register('location',views.viewsets_location)
-router.register('message', views.viewsets_message)
+router.register('announcements', views.viewsets_annoncement)
+router.register('types', views.viewsets_type)
+router.register('categories',views.viewsets_category)
+router.register('wilayas',views.viewsets_wilayas)
+router.register('communes',views.viewsets_commune)
+router.register('addresses',views.viewsets_address)
+router.register('locations',views.viewsets_location)
+router.register('messages', views.viewsets_message)
 
 
 urlpatterns = [
@@ -28,6 +29,9 @@ urlpatterns = [
     path('search_filter',views.search_filter),
     path('login/',views.Login ),
     path('send_message/',views.send_message),
+    path('get_recieved_messges/',views.get_recieved_messages),
+    path('get_sent_messges/',views.get_sent_messages),
+    path('get_my_fav/',views.get_my_fav),
     path('',include(router.urls)),
 
 ]

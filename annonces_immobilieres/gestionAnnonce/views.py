@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,UserSerializer, MessageSerializer
-from .models import Annoncement, Type, Commune, Location, Wilaya,Address, Messages, User
+from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,UserSerializer, MessageSerializer, CategorySerializer
+from .models import Annoncement, Type, Commune, Location, Wilaya,Address, Messages, Caregorie
 from rest_framework.permissions import AllowAny
 from gestionAnnonce import servises
 from django.shortcuts import get_object_or_404
@@ -85,6 +85,12 @@ class viewsets_type(viewsets.ModelViewSet):
     serializer_class=TypeSerializer
     filter_backends=[filters.SearchFilter]
     search_fields=['nom_type']
+
+class viewsets_category(viewsets.ModelViewSet): 
+    queryset=Caregorie.objects.all()
+    serializer_class=CategorySerializer
+    filter_backends=[filters.SearchFilter]
+    search_fields=['nom_cat']
 
 class viewsets_address(viewsets.ModelViewSet):
     queryset= Address.objects.all()
@@ -169,7 +175,7 @@ def send_message(request):
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def Login(request):
-    return Response(servises.AuthManager.login(request.data["email"],request.data["first_name"],request.data["first_name"],request.data["image"]))
+    return Response(servises.AuthManager.login(request.data["email"],request.data["family_name"],request.data["first_name"],request.data["image"]))
 
 
 @api_view(['GET'])
@@ -212,4 +218,27 @@ def search_filter(request) :
         request.data["first_date"],
         request.data["second_date"],)
     serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def get_recieved_messages(request):
+    messages= servises.MessagManager.get_my_messages(request.user.id)
+    serializer=MessageSerializer(messages, many=True)
+    data={
+        "nb_unread_messages":servises.MessagManager.unread_messages(request.user.id),
+        "recieved_messages":serializer.data
+    }
+    return Response(data)
+
+@api_view(['GET'])
+def get_sent_messages(request):
+    messages= servises.MessagManager.get_sent_messages(request.user.id)
+    serializer= MessageSerializer(messages,many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def get_my_fav(request):
+    fav= servises.FavoriteManager.get_my_favorites(request.user.id)
+    serializer= AnnoceSerializer(fav,many=True)
     return Response(serializer.data)

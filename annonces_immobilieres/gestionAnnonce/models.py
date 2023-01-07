@@ -1,14 +1,14 @@
 from django.db import models
 from smart_selects.db_fields import ChainedForeignKey 
 from phone_field import PhoneField
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-from django.conf import settings
 from django.utils import timezone
 from datetime import datetime
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager,PermissionsMixin
-from django.core.validators import RegexValidator
+
+
+
+
 
 class Caregorie(models.Model):
     nom_cat = models.CharField(max_length=20)
@@ -27,12 +27,9 @@ class Contact(models.Model):
     tele = PhoneField()
     def __str__(self):
         return self.prenom
-
-
 # Location = wilaya + communes + address
 # wilaya = commune+
 #address= address + coordinates
-
 class Wilaya(models.Model):
     designation = models.CharField(max_length=35, unique=True)
     def __str__(self):
@@ -55,7 +52,6 @@ class Address(models.Model):
     longitude= models.DecimalField(decimal_places=7, max_digits= 10)
     def __str__(self):
         return self.address
-
 
 class Location(models.Model):
     wilaya = models.ForeignKey( #each localization has one wilaya
@@ -83,8 +79,42 @@ class Location(models.Model):
     def __str__(self):
         return self.address.address
 
-class Annonce(models.Model):
+class UserManager(BaseUserManager):
+    def create_user(self,email ,password=None,**extra_fields ):
+        if email is None:
+            raise TypeError('Users should have an Email')
+        user = self.model(email=self.normalize_email(email),is_staff=False , is_active=True,is_superuser=False,date_joined=timezone.now(),last_login=timezone.now() ,**extra_fields)
+        user.set_unusable_password()
+        user.save()
+        return user
+    def create_superuser(self,email ,password ,**extra_fields):
+        if email is None:
+            raise TypeError('Users should have an Email')
+        user = self.model(email=self.normalize_email(email),is_staff=True , is_active=True,is_superuser=True,date_joined=timezone.now(),**extra_fields)
+        user.set_password(password)
+        user.save()
+        return user
+
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(max_length=254,default="", unique=True)
+    family_name = models.CharField(max_length=254, null=True, blank=True)
+    first_name= models.CharField(max_length=254, null=True, blank=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(auto_now=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    image = models.ImageField(blank = True, null=True,upload_to="images/photo%y%m%d",)
+    objects = UserManager()
+    USERNAME_FIELD = 'email'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = []
+    def __str__(self):
+        return self.email
+
+class Annoncement(models.Model):
     title= models.CharField(max_length=35, default='')
+    deleted = models.BooleanField(default=False)
     caregorie = models.ForeignKey(
         Caregorie,
         default='',
@@ -115,63 +145,46 @@ class Annonce(models.Model):
     creation_date= models.DateTimeField(
         default=datetime.now
     )
+    user = models.ForeignKey(
+        User,
+        default='',
+        related_name='annonce',
+        on_delete=models.CASCADE,
+        )
+    
+    
+    favorated_by = models.ManyToManyField(
+        User,
+        default='',
+        related_name='favorite',
+    
+    )
+    
+    
+
     def __str__(self):
         return self.title
 
 class AnnoncementImage(models.Model):
     annoncement = models.ForeignKey(
-        Annonce,default='',
+        Annoncement,default='',
         related_name='images',
         on_delete=models.CASCADE,
         )
     image =models.ImageField(
-        upload_to="photo%y%m%d",
+        upload_to="images/photo%y%m%d",
         blank=True,
         null=True,
         )
     def __str__(self):
         return self.image.url
 
-class UserManager(BaseUserManager):
-    def create_user(self,email ,password=None,**extra_fields ):
-        if email is None:
-            raise TypeError('Users should have an Email')
-        user = self.model(email=self.normalize_email(email),is_staff=False , is_active=True,is_superuser=False,date_joined=timezone.now(),last_login=timezone.now() ,**extra_fields)
-        user.set_unusable_password()
-        user.save()
-        return user
-    def create_superuser(self,email ,password ,**extra_fields):
-        if email is None:
-            raise TypeError('Users should have an Email')
-        user = self.model(email=self.normalize_email(email),is_staff=True , is_active=True,is_superuser=True,date_joined=timezone.now(),**extra_fields)
-        user.set_password(password)
-        user.save()
-        return user
+class Messages(models.Model):
+    STATUS=[
+        ('Pending','Pending'),
+        ('Read','Read')
+    ]
 
-class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(max_length=254,default="", unique=True)
-    family_name = models.CharField(max_length=254, null=True, blank=True)
-    first_name= models.CharField(max_length=254, null=True, blank=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    date_joined = models.DateTimeField(auto_now=True)
-    last_login = models.DateTimeField(null=True, blank=True)
-    image = models.ImageField(blank = True, null=True)
-    objects = UserManager()
-    USERNAME_FIELD = 'email'
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = []
-    def __str__(self):
-        return self.email
-
-#create token to each new user
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
-
-class Message(models.Model):
     content = models.TextField()
     sent_to= models.ForeignKey(
         User,
@@ -185,6 +198,7 @@ class Message(models.Model):
         related_name='sent_messages',
         on_delete=models.PROTECT
         )
-    send_date = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now=True)
+    status= models.CharField(max_length=15, choices=STATUS, default='Pending')
     def __str__(self):
         return self.content

@@ -1,20 +1,28 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,RegestierSerializer,tokenSerializer,MessageSerializer
-from .models import Annonce, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya,Address,User,Token,Message
-import geopy.geocoders
-geopy.geocoders.options.default_timeout = 7
-from geopy.geocoders import Nominatim
+from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,UserSerializer, MessageSerializer, CategorySerializer
+from .models import Annoncement, Type, Commune, Location, Wilaya,Address, Messages, Caregorie
 from rest_framework.permissions import AllowAny
+from gestionAnnonce import servises
+from django.shortcuts import get_object_or_404
 
 #===================================================================================================================
 #                                                 FILTERED QUERYSETS
 #===================================================================================================================
 
+
+@api_view(['GET'])
+def user_annocement(request,id):
+    annonce = Annoncement.objects.filter(
+        user__id__iexact = id
+        )
+    serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)
+
 @api_view(['GET'])
 def find_annocement_type(request,type):
-    annonce = Annonce.objects.filter(
+    annonce = Annoncement.objects.filter(
         type__nom_type__iexact = type
         )
     serializer=AnnoceSerializer(annonce ,many=True)
@@ -22,7 +30,7 @@ def find_annocement_type(request,type):
 
 @api_view(['GET'])
 def find_annocement_wilaya(request,wilaya):
-    annonce = Annonce.objects.filter(
+    annonce = Annoncement.objects.filter(
         location__wilaya__designation__iexact = wilaya
         )
     serializer=AnnoceSerializer(annonce ,many=True)
@@ -30,7 +38,7 @@ def find_annocement_wilaya(request,wilaya):
 
 @api_view(['GET'])
 def find_annocement_commune(request,commune):
-    annonce = Annonce.objects.filter(
+    annonce = Annoncement.objects.filter(
         location__commune__designation__iexact=commune
         )
     serializer=AnnoceSerializer(annonce ,many=True)
@@ -38,7 +46,7 @@ def find_annocement_commune(request,commune):
 
 @api_view(['GET'])
 def find_annocement_category(request,category):
-    annonce = Annonce.objects.filter(
+    annonce = Annoncement.objects.filter(
         caregorie__nom_cat=category
         )
     serializer=AnnoceSerializer(annonce ,many=True)
@@ -49,7 +57,7 @@ def find_annocement_category(request,category):
 #===================================================================================================================
 
 class viewsets_annoncement(viewsets.ModelViewSet):
-    queryset=Annonce.objects.all()
+    queryset=Annoncement.objects.all().order_by('creation_date')
     serializer_class=AnnoceSerializer
     filter_backends=[filters.SearchFilter]
     search_fields=['type__nom_type',
@@ -59,6 +67,7 @@ class viewsets_annoncement(viewsets.ModelViewSet):
     'description',
     'title'
     ]
+    
 
 class viewsets_wilayas(viewsets.ModelViewSet):
     queryset=Wilaya.objects.all()
@@ -77,6 +86,12 @@ class viewsets_type(viewsets.ModelViewSet):
     filter_backends=[filters.SearchFilter]
     search_fields=['nom_type']
 
+class viewsets_category(viewsets.ModelViewSet): 
+    queryset=Caregorie.objects.all()
+    serializer_class=CategorySerializer
+    filter_backends=[filters.SearchFilter]
+    search_fields=['nom_cat']
+
 class viewsets_address(viewsets.ModelViewSet):
     queryset= Address.objects.all()
     serializer_class=AddressSerializer
@@ -88,14 +103,17 @@ class viewsets_location(viewsets.ModelViewSet):
     search_fields=['address__address']
 
 class viewsets_message(viewsets.ModelViewSet):
-    queryset= Message.objects.all()
+    queryset= Messages.objects.all()
     serializer_class= MessageSerializer
     search_fields=['content','sent_by','sent_to']
 
-class viewsets_user(viewsets.ModelViewSet):
-    queryset= User.objects.all()
-    serializer_class= RegestierSerializer
-    search_fields=['content','sent_by','sent_to']
+    def retrieve(self, request, pk=None):
+        queryset = Messages.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        user.status='Read'
+        user.save()
+        serializer = MessageSerializer(user)
+        return Response(serializer.data)
 
 #===================================================================================================================
 #                                                 UPDATING AND CREATING
@@ -103,164 +121,124 @@ class viewsets_user(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 def create_Annocement(request):
-    try:
-        category= Caregorie.objects.get(id=request.data["category"])
-        type= Type.objects.get(id=request.data["type"])
-        wilaya= Wilaya.objects.get(id= request.data["wilaya"])
-        commune= Commune.objects.get(id= request.data["commune"])
-    except Caregorie.DoesNotExist or Type.DoesNotExist or Wilaya.DoesNotExist or Commune.DoesNotExist :
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    annonce = Annonce.objects.create(
-        title= request.data["title"],
-        caregorie= category,
-        type= type,
-        interface= request.data["area"],
-        prix=request.data["price"],
-        description= request.data["description"],
-        contact=Contact.objects.create(
-            nom= request.data["name"],
-            prenom= request.data["last_name"],
-            adresse= request.data["personal_address"],
-            tele=request.data["phone"],
-        ),
-        location=Location.objects.create(
-            wilaya=wilaya,
-            commune=commune,
-            address=Address.objects.create(
-                address= request.data["address"],
-                latitude=get_coordinates(request.data["address"])["lat"],
-                longitude=get_coordinates(request.data["address"])["long"],
-            )
+    annoncement=servises.AnnouncemntManager.create_Announcement(
+        request.data["title"],
+        request.data['area'],
+        request.data['price'],
+        request.data['description'],
+        request.data['id_category'],
+        request.data['id_type'],
+        request.data['id_user'],
+        request.data["name"],
+        request.data["last_name"],
+        request.data["personal_address"],
+        request.data["phone"],
+        request.data["id_wilaya"],
+        request.data["id_commune"],
+        request.data["address"],
+        request.FILES.getlist('uploaded_images')
         )
-        )
-    uploaded_images = request.FILES.getlist('uploaded_images')
-    for img in uploaded_images:
-        AnnoncementImage.objects.create(annoncement =annonce,image=img)
-    serializer= AnnoceSerializer(annonce)
+    serializer= AnnoceSerializer(annoncement)
     return Response(serializer.data,status=status.HTTP_201_CREATED) 
 
 @api_view(['PUT'])
 def modify_Announcement(request,id):
-    try:
-        category= Caregorie.objects.get(id=request.data["category"])
-        type= Type.objects.get(id=request.data["type"])
-        wilaya= Wilaya.objects.get(id= request.data["wilaya"])
-        commune= Commune.objects.get(id= request.data["commune"])
-        announcement= Annonce.objects.get(id= id)
-        contact= Contact.objects.get(id=announcement.contact.id)
-        location= Location.objects.get(id=announcement.location.id)
-        address= Address.objects.get(id=location.address.id)
-    except Caregorie.DoesNotExist or Type.DoesNotExist or Wilaya.DoesNotExist or Commune.DoesNotExist or Annonce.DoesNotExist or Contact.DoesNotExist or Location.DoesNotExist or Address.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    announcement.title= request.data["title"]
-    announcement.caregorie= category
-    announcement.type= type
-    announcement.interface= request.data["area"]
-    announcement.prix=request.data["price"]
-    announcement.description= request.data["description"]
-    contact.nom=request.data["name"],
-    contact.prenom=request.data["last_name"],
-    contact.adresse=request.data["personal_address"],
-    contact.tele=request.data["phone"],
-    location.wilaya=wilaya
-    location.commune=commune
-    address.address=request.data["address"]
-    address.latitude=get_coordinates(request.data["address"])["lat"]
-    address.longitude=get_coordinates(request.data["address"])["long"]
-    announcement.save()
-    uploaded_images = request.FILES.getlist('uploaded_images')
-    #ask the others about this later
-    for img in uploaded_images:
-        AnnoncementImage.objects.create(annoncement =announcement,image=img)
-    serializer= AnnoceSerializer(announcement)
+    annoncement=servises.AnnouncemntManager.modify_Announcement(
+        request.data["title"],
+        request.data['area'],
+        request.data['price'],
+        request.data['description'],
+        request.data['id_category'],
+        request.data['id_type'],
+        request.data["name"],
+        request.data["last_name"],
+        request.data["personal_address"],
+        request.data["phone"],
+        request.data["id_wilaya"],
+        request.data["id_commune"],
+        id,
+        request.data["address"],
+        )
+    serializer= AnnoceSerializer(annoncement)
     return Response(serializer.data,status=status.HTTP_201_CREATED) 
 
-#===================================================================================================================
-#                                                 CALLABLE FUNCTIONS
-#===================================================================================================================
-
-def get_coordinates(address):
-    geolocator = Nominatim(user_agent="gestionAnnonce")
-    location = geolocator.geocode(address)
-    latitude= location.latitude
-    longitude= location.longitude
-    print(location.address)
-    data= {
-        "lat": latitude,
-        "long": longitude
-    }
-    return data
-#===================================================================================================================
-#                                                 LOCATION TESTS
-#===================================================================================================================
-#you give it address and it returns its coordinates
 @api_view(['POST'])
-def location_coordinates(request):
-    geolocator = Nominatim(user_agent="gestionAnnonce")
-    location = geolocator.geocode(request.data["address"])
-    latitude= location.latitude
-    longitude= location.longitude
-    print(location.address)
-    data= {
-        "lat": latitude,
-        "long": longitude,
-        "address": location.address
-    }
-    return Response(data)
-
-#you give it coordinates and it returns its address
-@api_view(['POST'])
-def coordinates_location(request):
-    geolocator = Nominatim(user_agent="gestionAnnonce")
-    address= geolocator.reverse((request.data["lat"],request.data["long"])).address
-    print(address)
-    data={
-        "address":address
-    }
-    return Response(data)
-
-#===================================================================================================================
-#                                              INITIALIZING FUNCTION
-#===================================================================================================================
-import json
-
-
-@api_view(['GET'])
-def get_cities(request):
-    f=open('algeria_cities.json',encoding='UTF-8')
-    algeria_cities= json.load(f)
-    print(algeria_cities)
-    for commune in algeria_cities:
-        Wilaya.objects.get_or_create(
-                designation=commune["wilaya_name"]
-            )
-    for commune in algeria_cities:
-        Commune.objects.get_or_create(
-            designation=commune["commune_name"],
-            wilaya=Wilaya.objects.get(
-                designation=commune["wilaya_name"]
-            )
-        )
-    return Response({"bird":"duck"})
+def send_message(request):
+    message= servises.MessagManager.send_message(
+        request.data['sent_by'],
+        request.data['sent_to'],
+        request.data['content']
+    )
+    serializer= MessageSerializer(message)
+    return Response(serializer.data, status= status.HTTP_201_CREATED)
 
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def Login(request):
-    if User.objects.filter(email=request.data['email']).exists() :
-        token =Token.objects.get(user=User.objects.get(email=request.data['email']))
-        return Response(token.key) 
-    else :
-        User.objects.create(email=request.data['email'])
-        token =Token.objects.get(user=User.objects.get(email=request.data['email']))
-        return Response(token.key,status=status.HTTP_201_CREATED )
-
-class viewsets_login(viewsets.ModelViewSet):
-    queryset=User.objects.all()
-    serializer_class=RegestierSerializer
-
-class viewsets_token(viewsets.ModelViewSet):
-    queryset=Token.objects.all()
-    serializer_class=tokenSerializer
+    return Response(servises.AuthManager.login(request.data["email"],request.data["family_name"],request.data["first_name"],request.data["image"]))
 
 
+@api_view(['GET'])
+def all_announcemnt(request):
+    annonce =servises.AnnouncemntManager.get_announcements()
+    serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)
 
+
+@api_view(['GET']) 
+def delete_announcemnt(request,id):   
+    servises.AnnouncemntManager.delete_announcement(id)
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET']) 
+def find_user(request):
+    user =servises.AuthManager.find_user(request.data["token"])
+    serializer=UserSerializer(user ,many=False)
+    return Response(serializer.data)
+
+@api_view(['post'])
+def add_favorate(request):
+    servises.FavoriteManager.add_favorate(request.data["id_user"],request.data["id_announcement"])
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['post'])
+def remove_favorate(request):
+    servises.FavoriteManager.remove_favorate(request.data["id_user"],request.data["id_announcement"])
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def search_filter(request) :
+    annonce = servises.AnnouncemntManager.search_filter(
+        request.data["search"],
+        request.data["category"],
+        request.data["commune"],
+        request.data["wilaya"],
+        request.data["type"],
+        request.data["first_date"],
+        request.data["second_date"],)
+    serializer=AnnoceSerializer(annonce ,many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def get_recieved_messages(request):
+    messages= servises.MessagManager.get_my_messages(request.user.id)
+    serializer=MessageSerializer(messages, many=True)
+    data={
+        "nb_unread_messages":servises.MessagManager.unread_messages(request.user.id),
+        "recieved_messages":serializer.data
+    }
+    return Response(data)
+
+@api_view(['GET'])
+def get_sent_messages(request):
+    messages= servises.MessagManager.get_sent_messages(request.user.id)
+    serializer= MessageSerializer(messages,many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def get_my_fav(request):
+    fav= servises.FavoriteManager.get_my_favorites(request.user.id)
+    serializer= AnnoceSerializer(fav,many=True)
+    return Response(serializer.data)

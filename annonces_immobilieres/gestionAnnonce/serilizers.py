@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Annonce, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token,Message
+from .models import Annoncement, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token, Messages
+from .servises import MessagManager
 
 #translate python to json
 
@@ -27,11 +28,11 @@ class AnnoncementImageSerializer(serializers.ModelSerializer):
 
 
 class AnnoceSerializer(serializers.ModelSerializer):
-    images=AnnoncementImageSerializer(many=True, read_only=True)
+    images=serializers.StringRelatedField(many=True, read_only=True)
     type= serializers.StringRelatedField(many=False, read_only=True)
     caregorie= serializers.StringRelatedField(many= False, read_only= True)
     class Meta:
-        model = Annonce
+        model = Annoncement
         fields = [
             'id',
             'title',
@@ -44,6 +45,9 @@ class AnnoceSerializer(serializers.ModelSerializer):
             'type',
             'creation_date',
             'images',
+            'user',
+            'favorated_by',
+            'deleted'
             ]
 
 
@@ -82,18 +86,27 @@ class tokenSerializer(serializers.ModelSerializer):
         model = Token
         fields = ['key']
 
+
 class MessageSerializer(serializers.ModelSerializer):
     sent_to= serializers.PrimaryKeyRelatedField(many= False, read_only= True)
     sent_by= serializers.PrimaryKeyRelatedField(many= False, read_only= True)
     class Meta:
-        model = Message
-        fields= ['content','sent_to','sent_by','send_date']
+        model = Messages
+        fields= ['content','sent_to','sent_by','created_at','status']
 
-class RegestierSerializer(serializers.ModelSerializer):
-    key=tokenSerializer
+
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email','sent_messages','recieved_messages']
-
+        fields = [
+            'email',
+            'annonce',
+            'last_login',
+            'date_joined',
+            'image',
+            'first_name',
+            'family_name',
+            'favorite',
+        ]
 
 

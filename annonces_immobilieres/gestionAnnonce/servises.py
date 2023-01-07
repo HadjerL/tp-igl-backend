@@ -251,7 +251,7 @@ class MessagManager():
 
 class FavoriteManager():
     def add_favorate(id_user,id_announcement):
-        announcement = Annoncement.objects.get(id=id_announcement)
+        announcement = Annoncement.objects.get(id=id_announcement,deleted=False)
         user =User.objects.get(id=id_user)
         announcement.favorated_by.add(user.id)
 

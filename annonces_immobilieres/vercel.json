@@ -1,0 +1,13 @@
+{
+    "builds": [{
+        "src": "annonces_immobilieres/wsgi.py",
+        "use": "@vercel/python",
+        "config": { "maxLambdaSize": "15mb","runtime": "Python3.11.1" }
+    }],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "annonces_immobilieres/wsgi.py"
+        }
+    ]
+}

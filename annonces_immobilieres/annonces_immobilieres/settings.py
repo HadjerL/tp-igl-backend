@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-_paw!m32fimv^uv+whwku-itgfyd+6v&84vqbtuxy^^orhdb2^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.vercel.app','127.0.0.1']
 
 
 # Application definition
@@ -47,8 +47,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': 
     ['rest_framework.authentication.TokenAuthentication'],
     #globale authentication with token
-    # 'DEFAULT_PERMISSION_CLASSES':
-    # ['rest_framework.permissions.IsAuthenticated'],
+    'DEFAULT_PERMISSION_CLASSES':
+    ['rest_framework.permissions.IsAuthenticated'],
 
 }
 
@@ -86,10 +86,21 @@ WSGI_APPLICATION = 'annonces_immobilieres.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+import os
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'tp_igl',
+        'USER': 'root',
+        'PASSWORD': 'hadjer',
+        'HOST':'localhost',
+        'PORT':'3306',
     }
 }
 

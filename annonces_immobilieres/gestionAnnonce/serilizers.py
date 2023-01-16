@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Annoncement, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token, Messages
+from .models import Annoncement, Contact, Type, Category, Wilaya, Commune, Location, AnnoncementImage, Address, User, Token, Messages
 from .servises import MessagManager
 
 #translate python to json
@@ -14,26 +14,17 @@ class ContactSerializer(serializers.ModelSerializer):
 class TypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Type
-        fields = ['nom_type']
+        fields = '__all__'
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Caregorie
-        fields = ['nom_cat']
+        model = Category
+        fields = '__all__'
 
 class AnnoncementImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnnoncementImage
         fields = ["id", "image", "annoncement"]
-
-
-class WilayaSerializer(serializers.ModelSerializer):
-    #targets the related field using its primaryKey
-    commune = serializers.StringRelatedField(many= True, read_only=True)
-    class Meta:
-        model = Wilaya
-        # gets the field designation from wilaya and all commune related
-        fields = ['designation','commune']
 
 class CommuneSerializer(serializers.ModelSerializer):
     wilaya= serializers.StringRelatedField(many= False, read_only= True)
@@ -41,6 +32,16 @@ class CommuneSerializer(serializers.ModelSerializer):
         model = Commune
         fields = ['designation','wilaya']
         # gets the field designation from commune and locations related
+
+class WilayaSerializer(serializers.ModelSerializer):
+    #targets the related field using its primaryKey
+    commune = CommuneSerializer(many= True, read_only=True)
+    class Meta:
+        model = Wilaya
+        # gets the field designation from wilaya and all commune related
+        fields = ['id','designation','commune']
+
+
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,17 +59,17 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class AnnoceSerializer(serializers.ModelSerializer):
     images=serializers.StringRelatedField(many=True, read_only=True)
-    type= serializers.StringRelatedField(many=False, read_only=True)
-    caregorie= serializers.StringRelatedField(many= False, read_only= True)
+    type= TypeSerializer(many=False, read_only=True)
+    category = CategorySerializer(many= False, read_only= True)
     location= LocationSerializer(many=False, read_only=True)
     class Meta:
         model = Annoncement
         fields = [
             'id',
             'title',
-            'caregorie',
-            'interface',
-            'prix',
+            'category',
+            'area',
+            'price',
             'description',
             'contact',
             'location',

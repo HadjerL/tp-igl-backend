@@ -1,13 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Annoncement, Contact, Type, Caregorie, Wilaya, Commune, Location, AnnoncementImage, User, Address, Messages
+from .models import Annoncement, Contact, Type, Category, Wilaya, Commune, Location, AnnoncementImage, User, Address, Messages
 # Registering models here.
 
 
 admin.site.register(Contact)
 admin.site.register(Type)
-admin.site.register(Caregorie)
+admin.site.register(Category)
 admin.site.register(Annoncement)
 admin.site.register(Wilaya)
 admin.site.register(Commune)

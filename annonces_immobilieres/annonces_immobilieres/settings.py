@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url
+import cloudinary_storage
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ SECRET_KEY = 'django-insecure-_paw!m32fimv^uv+whwku-itgfyd+6v&84vqbtuxy^^orhdb2^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app','127.0.0.1']
+ALLOWED_HOSTS = ['.vercel.app','127.0.0.1',]
 
 
 # Application definition
@@ -42,6 +44,9 @@ INSTALLED_APPS = [
     'smart_selects',    #for the chained forienkey 
     'phone_field',  #for phone number validation
     'gestionAnnonce.apps.GestionannonceConfig',
+    'corsheaders',
+    'cloudinary',
+    'cloudinary_storage'
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': 
@@ -60,6 +65,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = 'annonces_immobilieres.urls'
@@ -95,15 +102,21 @@ WSGI_APPLICATION = 'annonces_immobilieres.wsgi.application'
 import os
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'tp_igl',
-        'USER': 'root',
-        'PASSWORD': 'hadjer',
-        'HOST':'localhost',
-        'PORT':'3306',
+        'USER': 'tp_igle_user',
+        'PASSWORD': '9ZmLj0Imr37kxqvf4z5CgS8SzLZn9mcK',
+        'HOST':'dpg-cetgefpgp3jmgl0u60cg-a',
+        'PORT':'5432',
     }
 }
 
+DATABASES['default'] = dj_database_url.parse(
+    # 'postgres://tp_igle_user:9ZmLj0Imr37kxqvf4z5CgS8SzLZn9mcK@dpg-cetgefpgp3jmgl0u60cg-a.oregon-postgres.render.com/tp_igle',
+    'postgres://tp_igl_user:oe6YTQ7VMEEtOTGTSFUIW7yvh8FV1HO7@dpg-ceu4arg2i3mj6pkhf0n0-a.oregon-postgres.render.com/tp_igl',
+    conn_max_age=600,
+    conn_health_checks=True,
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -148,3 +161,33 @@ STATIC_URL = 'static/'
 #allows the usage of smart selcts
 USE_DJANGO_JQUERY = True
 AUTH_USER_MODEL = 'gestionAnnonce.User'
+USE_DJANGO_JQUERY = True
+AUTH_USER_MODEL = 'gestionAnnonce.User'
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = (
+'http://localhost:5173',
+)
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME' : 'dfhnkisz4',
+    'API_KEY' : '653263892964524',
+    'API_SECRET' : "LlxNwXneYaz2u1-12r0disakQms",
+}
+
+DEFAULT_FILE_STORAGE= 'cloudinary_storage.storage.MediaCloudinaryStorage'

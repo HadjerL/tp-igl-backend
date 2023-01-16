@@ -10,23 +10,24 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager,Permissi
 
 
 
-class Caregorie(models.Model):
-    nom_cat = models.CharField(max_length=20)
+class Category(models.Model):
+    cat_name = models.CharField(max_length=20)
     def __str__(self):
-        return self.nom_cat
+        return self.cat_name 
 
 class Type(models.Model):
-    nom_type = models.CharField(max_length=20)
+    type_name = models.CharField(max_length=20)
     def __str__(self):
-        return self.nom_type
+        return self.type_name
 
 class Contact(models.Model):
-    nom = models.CharField(max_length=35)
-    prenom = models.CharField(max_length=35)
-    adresse = models.CharField(max_length=50)
-    tele = PhoneField()
+    first_name = models.CharField(max_length=35)
+    family_name = models.CharField(max_length=35)
+    address = models.CharField(max_length=50)
+    mail = models.EmailField(max_length=254,default="",unique=False)
+    phone = PhoneField()
     def __str__(self):
-        return self.prenom
+        return self.first_name
 # Location = wilaya + communes + address
 # wilaya = commune+
 #address= address + coordinates
@@ -104,7 +105,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now=True)
     last_login = models.DateTimeField(null=True, blank=True)
-    image = models.ImageField(blank = True, null=True,upload_to="images/photo%y%m%d",)
+    image = models.CharField(default="",max_length=255)
     objects = UserManager()
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
@@ -112,11 +113,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+
+
+
 class Annoncement(models.Model):
     title= models.CharField(max_length=35, default='')
     deleted = models.BooleanField(default=False)
-    caregorie = models.ForeignKey(
-        Caregorie,
+    category= models.ForeignKey(
+        Category ,
         default='',
         related_name='annonce',
         on_delete=models.CASCADE,
@@ -127,8 +131,8 @@ class Annoncement(models.Model):
         related_name='annonce',
         on_delete=models.CASCADE,
         )
-    interface = models.FloatField(default=0.0)
-    prix= models.FloatField(default=0.0)
+    area = models.FloatField(default=0.0)
+    price= models.FloatField(default=0.0)
     description = models.TextField()
     contact = models.ForeignKey(
         Contact,
@@ -165,17 +169,15 @@ class Annoncement(models.Model):
     def __str__(self):
         return self.title
 
+# def upload_path (instance ,filename):
+#     return '/'.join(['tmp','images',filename])
 class AnnoncementImage(models.Model):
     annoncement = models.ForeignKey(
         Annoncement,default='',
         related_name='images',
         on_delete=models.CASCADE,
         )
-    image =models.ImageField(
-        upload_to="images/photo%y%m%d",
-        blank=True,
-        null=True,
-        )
+    image =models.ImageField(upload_to ='images/')
     def __str__(self):
         return self.image.url
 

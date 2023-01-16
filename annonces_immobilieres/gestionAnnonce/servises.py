@@ -1,6 +1,6 @@
 
 
-from .models import Annoncement, Type, Contact, Caregorie, AnnoncementImage, Commune, Location, Wilaya,Address,User,Token, Messages
+from .models import Annoncement, Type, Contact, Category, AnnoncementImage, Commune, Location, Wilaya,Address,User,Token, Messages
 from .interface import Iannouncement,Iauth
 from geopy.geocoders import Nominatim
 from validate_email import validate_email
@@ -9,10 +9,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 geopy.geocoders.options.default_timeout = 7
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
 import json
 import django_filters
 from django.db.models import Q
-
 
 
 
@@ -22,18 +23,19 @@ class LocationManager():
     def get_cities():
         f=open('algeria_cities.json',encoding='UTF-8')
         algeria_cities= json.load(f)
-        print(algeria_cities)
-        for commune in algeria_cities:
-            Wilaya.objects.get_or_create(
-                designation=commune["wilaya_name"]
-            )
+        # print(algeria_cities)
+        # for commune in algeria_cities:
+        #     Wilaya.objects.get_or_create(
+        #         designation=commune["wilaya_name"]
+        #     )
         for commune in algeria_cities:
             Commune.objects.get_or_create(
             designation=commune["commune_name"],
             wilaya=Wilaya.objects.get(
             designation=commune["wilaya_name"]
         )
-    )
+        )
+    #     print(algeria_cities)
     # get_cities()
     # del get_cities
 
@@ -64,10 +66,10 @@ class LocationManager():
         address.longitude=LocationManager.get_coordinates(address)["long"]
         return(location)
 
-    def creatLocation(id_commune:int,id_wilaya:int,address):
+    def creatLocation(commune:str,id_wilaya:int,address):
         try:
             wilaya= Wilaya.objects.get(id=id_wilaya)
-            commune= Commune.objects.get(id=id_commune)
+            commune= Commune.objects.get(designation__iexact  =commune)
         except  Wilaya.DoesNotExist or Commune.DoesNotExist :
             raise ValueError
         location=Location.objects.create(
@@ -95,7 +97,7 @@ class AuthManager(Iauth):
             token =Token.objects.get(user=User.objects.get(email=email))
             return (token.key) 
         else :
-            is_valid = validate_email(email,verify=True)
+            is_valid =True
             if  is_valid :
                 User.objects.create(email=email,first_name=first_name,family_name=family_name,image=image)
                 token =Token.objects.get(user=User.objects.get(email=email))
@@ -103,63 +105,64 @@ class AuthManager(Iauth):
             else :
                 raise ValueError
 
-    def find_user(token):
-        mail= (Token.objects.get(key=token)).user
-        return(User.objects.get(email=mail))
+    def find_user(id):
+        return(User.objects.get(id=id))
 
 
 
 class AnnouncemntManager (Iannouncement):
 
-    def create_Announcement(title:str,area:int,price:int,description:str,id_category:int,id_type:int,id_user:int,name:str,last_name:str,personal_address:str,phone:str,id_commune:int,id_wilaya:int,address:str,uploaded_images):
+    def create_Announcement(title:str,area:int,price:int,description:str,id_category:int,id_type:int,id_user:int,name:str,last_name:str,personal_address:str,phone:str,id_wilaya:int,commune:str,address:str,uploaded_images,email):
         try:
-            category= Caregorie.objects.get(id=id_category)
+            category= Category.objects.get(pk=id_category)
             type= Type.objects.get(id=id_type)
             user=User.objects.get(id=id_user)
-        except Caregorie.DoesNotExist or Type.DoesNotExist or User.DoesNotExist :
+        except Category.DoesNotExist or Type.DoesNotExist or User.DoesNotExist :
             raise ValueError
         
         annonce = Annoncement.objects.create(
         title= title,
-        caregorie= category,
+        category = category,
         type= type,
         user=user,
-        interface= area,
-        prix=price,
+        area= area,
+        price=price,
         description= description,
         deleted =False,
         contact=Contact.objects.create(
-            nom= name,
-            prenom= last_name,
-            adresse= personal_address,
-            tele=phone,
+            first_name = name,
+            family_name = last_name,
+            address = personal_address,
+            phone =phone,
+            mail =email
         ),
-        location=LocationManager.creatLocation(id_commune,id_wilaya,address)
+        location=LocationManager.creatLocation(commune,id_wilaya,address)
         )
+        
         for img in uploaded_images:
             AnnoncementImage.objects.create(annoncement =annonce,image=img)
         return(annonce)
 
     def modify_Announcement(title:str,area:int,price:int,description:str,id_category:int,id_type:int,name:str,last_name:str,personal_address:str,phone:str,id_wilaya:int,id_commune:int,id_announcement:int,adress:str):
         try:
-            category= Caregorie.objects.get(id=id_category)
+            category= Category.objects.get(id=id_category)
             type= Type.objects.get(id=id_type)
             announcement= Annoncement.objects.get(id=id_announcement)
             contact= Contact.objects.get(id=announcement.contact.pk)
-        except Caregorie.DoesNotExist or Type.DoesNotExist or Annoncement.DoesNotExist or Contact.DoesNotExist :
+        except Category.DoesNotExist or Type.DoesNotExist or Annoncement.DoesNotExist or Contact.DoesNotExist :
                 raise ValueError
         if announcement.deleted ==True :
             raise ValueError
         announcement.title= title
-        announcement.caregorie= category
+        announcement.category = category
         announcement.type= type
-        announcement.interface=area
-        announcement.prix=price
+        announcement.area=area
+        announcement.price=price
         announcement.description= description
-        contact.nom=name
-        contact.prenom=last_name
-        contact.adresse=personal_address
-        contact.tele=phone
+        contact.first_name =name
+        contact.family_name =last_name
+        contact.address =personal_address
+        contact.phone =phone
         announcement.contact=contact
         announcement.location=LocationManager.modifyLocation(announcement,id_wilaya,id_commune,adress)
         announcement.save()
@@ -177,38 +180,33 @@ class AnnouncemntManager (Iannouncement):
     def get_announcements():
         return (Annoncement.objects.filter(deleted=False))
     
+    def get_announcement(id):
+        return (Annoncement.objects.filter(deleted=False,id =id))
+    
     def search_filter(search,category,commune,wilaya,type,first_date,second_date):
         annonce = Annoncement.objects.filter(deleted=False)
-        m=["imane","h"]
         if search != "":
             annoncement = []
             for keyword in search:
-                annoncement = annoncement or annonce.filter(Q(description__contains=keyword) | Q(title__contains=keyword))
-            if category != "" or commune != "" or wilaya!="" or type !="" :
-                if first_date !="" and  second_date !="":
-                    annoncement = annoncement.filter(Q(caregorie__id__in=category) | Q (location__commune__id__in=commune ) | Q( location__wilaya__id__in= wilaya) | Q(type__id__in= type)|Q(creation_date__range=[first_date,second_date ] ) )
-                    return (annoncement)
-                elif first_date =="" and  second_date =="" :
-                    annoncement = annoncement.filter( Q(caregorie__id__in=category) | Q (location__commune__id__in=commune ) | Q( location__wilaya__id__in= wilaya) | Q(type__id__in= type) )
-                    return (annoncement)
-                else:
-                    raise ValueError
+                annoncement = annoncement or annonce.filter(Q(description__icontains=keyword) | Q(title__icontains=keyword))
+        if category != "":
+            annonce= annonce.filter(category__id__in=category)
+        if type!="":
+            annonce= annonce.filter(type__id__in=type)
+        if commune != "" :
+            annonce= annonce.filter(location__commune__id__in=wilaya)
+        if wilaya!="" :
+            annonce= annonce.filter(location__wilaya__id__in=wilaya)
+        if first_date!="" :
+            if second_date!="":
+                annonce= annonce.filter(creation_date__range=[first_date,second_date ])
             else:
-                return (annoncement)
+                annonce= annonce.filter(creation_date__date=first_date)
+        elif second_date!="" :
+                annonce= annonce.filter(creation_date__date=second_date)
 
-        else :
-            if category != "" or commune != "" or wilaya!="" or type !="" :
-                if first_date !="" and  second_date !="" :
-                    annonce = annonce.filter(caregorie__id__in=category ,location__commune__id__in=commune , location__wilaya__id__in= wilaya ,type__id__in= type,creation_date__range=[first_date,second_date ] ) 
-                    return(annonce)
-                elif first_date =="" and  second_date =="" :
-                    annonce = annonce.filter(caregorie__id__in=category ,location__commune__id__in=commune ,location__wilaya__id__in= wilaya,type__id__in= type) 
-                    return(annonce)
-                else :
-                    raise ValueError
-            else:
-                return(annonce)
-        
+        return (annonce)
+    
 
 
 

@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
 from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,UserSerializer, MessageSerializer, CategorySerializer
-from .models import Annoncement, Type, Commune, Location, Wilaya,Address, Messages, Caregorie
+from .models import Annoncement, Type, Commune, Location, Wilaya,Address, Messages, Category
 from rest_framework.permissions import AllowAny
 from gestionAnnonce import servises
 from django.shortcuts import get_object_or_404
@@ -13,9 +13,9 @@ from django.shortcuts import get_object_or_404
 
 
 @api_view(['GET'])
-def user_annocement(request,id):
+def user_annocement(request):
     annonce = Annoncement.objects.filter(
-        user__id__iexact = id
+        user__id = request.user.id
         )
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
@@ -23,7 +23,7 @@ def user_annocement(request,id):
 @api_view(['GET'])
 def find_annocement_type(request,type):
     annonce = Annoncement.objects.filter(
-        type__nom_type__iexact = type
+        type__type_name__iexact = type
         )
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
@@ -47,7 +47,7 @@ def find_annocement_commune(request,commune):
 @api_view(['GET'])
 def find_annocement_category(request,category):
     annonce = Annoncement.objects.filter(
-        caregorie__nom_cat=category
+        category__cat_name =category
         )
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
@@ -60,10 +60,10 @@ class viewsets_annoncement(viewsets.ModelViewSet):
     queryset=Annoncement.objects.all().order_by('creation_date')
     serializer_class=AnnoceSerializer
     filter_backends=[filters.SearchFilter]
-    search_fields=['type__nom_type',
+    search_fields=['type__type_name',
     'location__wilaya__designation',
     'location__commune__designation',
-    'caregorie__nom_cat',
+    'category__cat_name ',
     'description',
     'title'
     ]
@@ -84,13 +84,13 @@ class viewsets_type(viewsets.ModelViewSet):
     queryset=Type.objects.all()
     serializer_class=TypeSerializer
     filter_backends=[filters.SearchFilter]
-    search_fields=['nom_type']
+    search_fields=['type_name']
 
 class viewsets_category(viewsets.ModelViewSet): 
-    queryset=Caregorie.objects.all()
+    queryset=Category.objects.all()
     serializer_class=CategorySerializer
     filter_backends=[filters.SearchFilter]
-    search_fields=['nom_cat']
+    search_fields=['cat_name ']
 
 class viewsets_address(viewsets.ModelViewSet):
     queryset= Address.objects.all()
@@ -126,17 +126,20 @@ def create_Annocement(request):
         request.data['area'],
         request.data['price'],
         request.data['description'],
-        request.data['id_category'],
-        request.data['id_type'],
+        request.data['category'],
+        request.data['type'],
         request.user.id,
-        request.data["name"],
-        request.data["last_name"],
+        request.data["firstName"],
+        request.data["lastName"],
         request.data["personal_address"],
-        request.data["phone"],
-        request.data["id_wilaya"],
-        request.data["id_commune"],
-        request.data["address"],
-        request.FILES.getlist('uploaded_images')
+        request.data["phoneNumber"],
+        request.data["wilaya"],
+        request.data["commune"],
+        request.data["adress"],
+        request.FILES.getlist('images'),
+        request.data["email"],
+        
+
         )
     serializer= AnnoceSerializer(annoncement)
     return Response(serializer.data,status=status.HTTP_201_CREATED) 
@@ -156,8 +159,9 @@ def modify_Announcement(request,id):
         request.data["phone"],
         request.data["id_wilaya"],
         request.data["id_commune"],
-        id,
+        request.FILES.getlist('images'),
         request.data["address"],
+       
         )
     serializer= AnnoceSerializer(annoncement)
     return Response(serializer.data,status=status.HTTP_201_CREATED) 
@@ -192,7 +196,7 @@ def delete_announcemnt(request,id):
 
 @api_view(['GET']) 
 def find_user(request):
-    user =servises.AuthManager.find_user(request.data["token"])
+    user =servises.AuthManager.find_user(request.user.id)
     serializer=UserSerializer(user ,many=False)
     return Response(serializer.data)
 
@@ -241,4 +245,10 @@ def get_sent_messages(request):
 def get_my_fav(request):
     fav= servises.FavoriteManager.get_my_favorites(request.user.id)
     serializer= AnnoceSerializer(fav,many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def get_announcement(request,id):
+    annonce =servises.AnnouncemntManager.get_announcement(id)
+    serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)

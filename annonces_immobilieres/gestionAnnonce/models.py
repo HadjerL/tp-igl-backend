@@ -186,7 +186,7 @@ class Messages(models.Model):
         ('Pending','Pending'),
         ('Read','Read')
     ]
-
+    title= models.CharField(max_length=35, default='')
     content = models.TextField()
     sent_to= models.ForeignKey(
         User,

@@ -90,14 +90,6 @@ class tokenSerializer(serializers.ModelSerializer):
         fields = ['key']
 
 
-class MessageSerializer(serializers.ModelSerializer):
-    sent_to= serializers.PrimaryKeyRelatedField(many= False, read_only= True)
-    sent_by= serializers.PrimaryKeyRelatedField(many= False, read_only= True)
-    class Meta:
-        model = Messages
-        fields= ['content','sent_to','sent_by','created_at','status']
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -111,5 +103,23 @@ class UserSerializer(serializers.ModelSerializer):
             'family_name',
             'favorite',
         ]
+
+class SenderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'email',
+            'first_name',
+            'family_name',
+        ]
+
+class MessageSerializer(serializers.ModelSerializer):
+    sent_to= serializers.PrimaryKeyRelatedField(many= False, read_only= True)
+    sent_by= SenderSerializer(many= False, read_only=True)
+
+    class Meta:
+        model = Messages
+        fields= ['title','content','sent_to','sent_by','created_at','status']
 
 

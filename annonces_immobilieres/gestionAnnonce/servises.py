@@ -218,22 +218,23 @@ class MessagManager():
         return Messages.objects.filter(status= 'Pending',sent_to=id_user).count()
 
     # *) creates a new message
-    def send_message(sending_user: str, recieving_user: str, content:str):
+    def send_message(sending_user:int, recieving_user:int, content:str, title:str):
         try:
-            sent_by= User.objects.get(email=sending_user)
-            sent_to= User.objects.get(email=recieving_user)
+            sent_by= User.objects.get(id=sending_user)
+            sent_to= User.objects.get(id=recieving_user)
         except User.DoesNotExist:
             raise ValueError
         Messages.objects.create(
             content=content,
             sent_by=sent_by,
             sent_to=sent_to,
+            title=title,
         )
 
     # *) Gets messges logged user recieved messages
     def get_my_messages(user_id):
         try:
-            my_messages= Messages.objects.filter(sent_to=user_id)
+            my_messages= Messages.objects.filter(sent_to=user_id).order_by('created_at')
         except Messages.DoesNotExist:
             raise ValueError
         return my_messages

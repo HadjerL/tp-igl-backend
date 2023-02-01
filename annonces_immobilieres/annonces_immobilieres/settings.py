@@ -43,10 +43,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'smart_selects',    #for the chained forienkey 
     'phone_field',  #for phone number validation
+    'cloudinary',
+    'cloudinary_storage',
     'gestionAnnonce.apps.GestionannonceConfig',
     'corsheaders',
-    'cloudinary',
-    'cloudinary_storage'
+    'django_extensions',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': 
@@ -58,6 +59,8 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,8 +68,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = 'annonces_immobilieres.urls'
@@ -166,6 +167,7 @@ AUTH_USER_MODEL = 'gestionAnnonce.User'
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = (
 'http://localhost:5173',
+'https://cloudinary'
 )
 CORS_ALLOW_HEADERS = [
     "accept",

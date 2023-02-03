@@ -41,8 +41,6 @@ class WilayaSerializer(serializers.ModelSerializer):
         # gets the field designation from wilaya and all commune related
         fields = ['id','designation','commune']
 
-
-
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model= Address
@@ -80,8 +78,6 @@ class AnnoceSerializer(serializers.ModelSerializer):
             'favorated_by',
             'deleted'
             ]
-
-
 
 
 class tokenSerializer(serializers.ModelSerializer):

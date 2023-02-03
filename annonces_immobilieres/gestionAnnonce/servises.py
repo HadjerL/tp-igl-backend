@@ -10,11 +10,10 @@ from django.dispatch import receiver
 from django.conf import settings
 geopy.geocoders.options.default_timeout = 7
 from django.core.files.uploadedfile import InMemoryUploadedFile
-
 import json
 import django_filters
 from django.db.models import Q
-
+import re
 
 
 
@@ -83,8 +82,6 @@ class LocationManager():
         )
         return(location)
 
-
-
 class AuthManager(Iauth):
     #create token to each new user
     @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -107,8 +104,6 @@ class AuthManager(Iauth):
 
     def find_user(id):
         return(User.objects.get(id=id))
-
-
 
 class AnnouncemntManager (Iannouncement):
 
@@ -184,31 +179,28 @@ class AnnouncemntManager (Iannouncement):
         return (Annoncement.objects.filter(deleted=False,id =id))
     
     def search_filter(search,category,commune,wilaya,type,first_date,second_date):
-        annonce = Annoncement.objects.filter(deleted=False)
-        if search != "":
-            annoncement = []
-            for keyword in search:
-                annoncement = annoncement or annonce.filter(Q(description__icontains=keyword) | Q(title__icontains=keyword))
-        if category != "":
-            annonce= annonce.filter(category__id__in=category)
-        if type!="":
-            annonce= annonce.filter(type__id__in=type)
-        if commune != "" :
-            annonce= annonce.filter(location__commune__id__in=wilaya)
-        if wilaya!="" :
-            annonce= annonce.filter(location__wilaya__id__in=wilaya)
-        if first_date!="" :
-            if second_date!="":
-                annonce= annonce.filter(creation_date__range=[first_date,second_date ])
-            else:
-                annonce= annonce.filter(creation_date__date=first_date)
-        elif second_date!="" :
-                annonce= annonce.filter(creation_date__date=second_date)
-
-        return (annonce)
-    
-
-
+            annonce = Annoncement.objects.filter(deleted=False).order_by('-creation_date')
+            if len (search )!=0:
+                annoncement =Annoncement.objects.none()
+                for keyword in search:
+                    annoncement= annoncement | (annonce.filter(Q(title__iregex=fr"\y({keyword})\y") | Q(description__iregex=fr"\y({keyword})\y")).order_by('-creation_date'))
+                annonce =annoncement
+            if category != "":
+                annonce= annonce.filter(category__id__in=category)
+            if type!="":
+                annonce= annonce.filter(type__id__in=type)
+            if commune != "" :
+                annonce= annonce.filter(location__commune__id__in=commune)
+            if wilaya!="" :
+                annonce=annonce.filter(location__wilaya__id__in=wilaya)
+            if first_date!="" :
+                if second_date!="":
+                    annonce= annonce.filter(creation_date__range=[first_date,second_date ])
+                else:
+                    annonce= annonce.filter(creation_date__date=first_date)
+            elif second_date!="" :
+                    annonce= annonce.filter(creation_date__date=second_date)
+            return (annonce)
 
 class MessagManager():
 
@@ -224,11 +216,12 @@ class MessagManager():
             sent_to= User.objects.get(email=recieving_user)
         except User.DoesNotExist:
             raise ValueError
-        Messages.objects.create(
+        message =Messages.objects.create(
             content=content,
             sent_by=sent_by,
             sent_to=sent_to,
         )
+        return(message)
 
     # *) Gets messges logged user recieved messages
     def get_my_messages(user_id):

@@ -14,16 +14,16 @@ router.register('messages', views.viewsets_message)
 
 
 urlpatterns = [
-    path('modify/<int:id>',views.modify_Announcement),
+    # path('modify/<int:id>',views.modify_Announcement),
     path('create/',views.create_Annocement ),
     path('userAnnoncement/',views.user_annocement ),
-    path('find_type/<str:type>', views.find_annocement_type),
-    path('find_wilaya/<str:wilaya>',views.find_annocement_wilaya),
-    path('find_commune/<str:commune>',views.find_annocement_commune),
-    path('find_category/<str:category>',views.find_annocement_category),
+    path('find_type/<str:type>/', views.find_annocement_type),
+    path('find_wilaya/<str:wilaya>/',views.find_annocement_wilaya),
+    path('find_commune/<str:commune>/',views.find_annocement_commune),
+    path('find_category/<str:category>/',views.find_annocement_category),
     path('all_announcement/',views.all_announcemnt),
-    path('get_announcement/<int:id>',views.get_announcement),
-    path('delete_announcement/<int:id>',views.delete_announcemnt),
+    path('get_announcement/<int:id>/',views.get_announcement),
+    path('delete_announcement/<int:id>/',views.delete_announcemnt),
     path('find_user/',views.find_user),
     path('add_favorite/',views.add_favorate),
     path('remove_favorate/',views.remove_favorate),

@@ -50,20 +50,6 @@ class LocationManager():
         }
         return data   
 
-    def modifyLocation(announcement:Annoncement,id_wilaya:int,id_commune:int,addres:str):
-        try:
-            location= Location.objects.get(id=announcement.location.pk)
-            wilaya= Wilaya.objects.get(id=id_wilaya)
-            commune= Commune.objects.get(id=id_commune)
-            address= Address.objects.get(id=location.address.pk)
-        except Wilaya.DoesNotExist or Commune.DoesNotExist or Location.DoesNotExist or Address.DoesNotExist:
-            raise ValueError
-        location.wilaya=wilaya
-        location.commune=commune
-        address.address=addres
-        address.latitude=LocationManager.get_coordinates(address)["lat"]
-        address.longitude=LocationManager.get_coordinates(address)["long"]
-        return(location)
 
     def creatLocation(commune:str,id_wilaya:int,address):
         try:
@@ -88,19 +74,29 @@ class AuthManager(Iauth):
     def create_auth_token(sender, instance=None, created=False, **kwargs):
         if created:
             Token.objects.create(user=instance)
-
+    
     def login(email,family_name ,first_name,image):
+        """
+        Approximate Fibonacci sequence
+
+        Args:
+            n (int): The place in Fibonacci sequence to approximate
+
+        Returns:
+            float: The approximate value in Fibonacci sequence
+        """
+        
         if User.objects.filter(email=email).exists() :
             token =Token.objects.get(user=User.objects.get(email=email))
             return (token.key) 
         else :
-            is_valid =True
+            is_valid =validate_email(email)
             if  is_valid :
                 User.objects.create(email=email,first_name=first_name,family_name=family_name,image=image)
                 token =Token.objects.get(user=User.objects.get(email=email))
                 return (token.key )
             else :
-                raise ValueError
+                return 500
 
     def find_user(id):
         return(User.objects.get(id=id))
@@ -138,31 +134,6 @@ class AnnouncemntManager (Iannouncement):
             AnnoncementImage.objects.create(annoncement =annonce,image=img)
         return(annonce)
 
-    def modify_Announcement(title:str,area:int,price:int,description:str,id_category:int,id_type:int,name:str,last_name:str,personal_address:str,phone:str,id_wilaya:int,id_commune:int,id_announcement:int,adress:str):
-        try:
-            category= Category.objects.get(id=id_category)
-            type= Type.objects.get(id=id_type)
-            announcement= Annoncement.objects.get(id=id_announcement)
-            contact= Contact.objects.get(id=announcement.contact.pk)
-        except Category.DoesNotExist or Type.DoesNotExist or Annoncement.DoesNotExist or Contact.DoesNotExist :
-                raise ValueError
-        if announcement.deleted ==True :
-            raise ValueError
-        announcement.title= title
-        announcement.category = category
-        announcement.type= type
-        announcement.area=area
-        announcement.price=price
-        announcement.description= description
-        contact.first_name =name
-        contact.family_name =last_name
-        contact.address =personal_address
-        contact.phone =phone
-        announcement.contact=contact
-        announcement.location=LocationManager.modifyLocation(announcement,id_wilaya,id_commune,adress)
-        announcement.save()
-        return(announcement)
-    
     def delete_announcement(id):
         announcement= Annoncement.objects.get(id=id)
         if announcement.deleted ==True :
@@ -210,23 +181,24 @@ class MessagManager():
         return Messages.objects.filter(status= 'Pending',sent_to=id_user).count()
 
     # *) creates a new message
-    def send_message(sending_user: str, recieving_user: str, content:str):
+    def send_message(sending_user:int, recieving_user:int, content:str, title:str):
         try:
-            sent_by= User.objects.get(email=sending_user)
-            sent_to= User.objects.get(email=recieving_user)
+            sent_by= User.objects.get(id=sending_user)
+            sent_to= User.objects.get(id=recieving_user)
         except User.DoesNotExist:
             raise ValueError
         message =Messages.objects.create(
             content=content,
             sent_by=sent_by,
             sent_to=sent_to,
+            title=title,
         )
         return(message)
 
     # *) Gets messges logged user recieved messages
     def get_my_messages(user_id):
         try:
-            my_messages= Messages.objects.filter(sent_to=user_id)
+            my_messages= Messages.objects.filter(sent_to=user_id).order_by('created_at')
         except Messages.DoesNotExist:
             raise ValueError
         return my_messages
@@ -245,7 +217,7 @@ class FavoriteManager():
         announcement = Annoncement.objects.get(id=id_announcement,deleted=False)
         user =User.objects.get(id=id_user)
         announcement.favorated_by.add(user.id)
-
+        return (announcement)
     def remove_favorate(id_user,id_announcement):
         announcement = Annoncement.objects.get(id=id_announcement,deleted=False)
         user =User.objects.get(id=id_user)

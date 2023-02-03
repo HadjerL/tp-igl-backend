@@ -144,34 +144,35 @@ def create_Annocement(request):
     serializer= AnnoceSerializer(annoncement)
     return Response(serializer.data,status=status.HTTP_201_CREATED) 
 
-@api_view(['PUT'])
-def modify_Announcement(request,id):
-    annoncement=servises.AnnouncemntManager.modify_Announcement(
-        request.data["title"],
-        request.data['area'],
-        request.data['price'],
-        request.data['description'],
-        request.data['id_category'],
-        request.data['id_type'],
-        request.data["name"],
-        request.data["last_name"],
-        request.data["personal_address"],
-        request.data["phone"],
-        request.data["id_wilaya"],
-        request.data["id_commune"],
-        request.FILES.getlist('images'),
-        request.data["address"],
-       
-        )
-    serializer= AnnoceSerializer(annoncement)
-    return Response(serializer.data,status=status.HTTP_201_CREATED) 
+# @api_view(['PUT'])
+# def modify_Announcement(request,id):
+#     annoncement=servises.AnnouncemntManager.modify_Announcement(
+#         request.data["title"],
+#         request.data['area'],
+#         request.data['price'],
+#         request.data['description'],
+#         request.data['id_category'],
+#         request.data['id_type'],
+#         request.data["name"],
+#         request.data["last_name"],
+#         request.data["personal_address"],
+#         request.data["phone"],
+#         request.data["id_wilaya"],
+#         request.data["id_commune"],
+#         request.FILES.getlist('images'),
+#         request.data["address"],
+
+#         )
+#     serializer= AnnoceSerializer(annoncement)
+#     return Response(serializer.data,status=status.HTTP_201_CREATED) 
 
 @api_view(['POST'])
 def send_message(request):
     message= servises.MessagManager.send_message(
-        request.data['sent_by'],
+        request.user.id,
         request.data['sent_to'],
-        request.data['content']
+        request.data['content'],
+        request.data['title'],
     )
     serializer= MessageSerializer(message)
     return Response(serializer.data, status= status.HTTP_201_CREATED)

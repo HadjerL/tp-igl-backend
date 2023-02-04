@@ -1,0 +1,542 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>gestionAnnonce.views &mdash; announcementproject_backend 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> announcementproject_backend
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">annonces_immobilieres</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">announcementproject_backend</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>gestionAnnonce.views</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gestionAnnonce.views</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">rest_framework.decorators</span> <span class="kn">import</span> <span class="n">api_view</span><span class="p">,</span> <span class="n">permission_classes</span>
+<span class="kn">from</span> <span class="nn">rest_framework</span> <span class="kn">import</span> <span class="n">status</span><span class="p">,</span> <span class="n">viewsets</span><span class="p">,</span> <span class="n">filters</span>
+<span class="kn">from</span> <span class="nn">rest_framework.response</span> <span class="kn">import</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">.serilizers</span> <span class="kn">import</span> <span class="n">AnnoceSerializer</span><span class="p">,</span> <span class="n">TypeSerializer</span><span class="p">,</span> <span class="n">CommuneSerializer</span><span class="p">,</span> <span class="n">WilayaSerializer</span><span class="p">,</span><span class="n">UserSerializer</span><span class="p">,</span> <span class="n">MessageSerializer</span><span class="p">,</span> <span class="n">CategorySerializer</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Annoncement</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Commune</span><span class="p">,</span> <span class="n">Wilaya</span><span class="p">,</span> <span class="n">Messages</span><span class="p">,</span> <span class="n">Category</span>
+<span class="kn">from</span> <span class="nn">rest_framework.permissions</span> <span class="kn">import</span> <span class="n">AllowAny</span>
+<span class="kn">from</span> <span class="nn">gestionAnnonce</span> <span class="kn">import</span> <span class="n">servises</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">get_object_or_404</span>
+
+
+<div class="viewcode-block" id="Login"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.Login">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;Post&#39;</span><span class="p">])</span>
+<span class="nd">@permission_classes</span><span class="p">([</span><span class="n">AllowAny</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">Login</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This view function logs in a user.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        request: a Request object containing data for login, including &quot;email&quot;, &quot;family_name&quot;, &quot;first_name&quot;, and &quot;image&quot;.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A Response object containing the result of the login.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">servises</span><span class="o">.</span><span class="n">AuthManager</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">],</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;family_name&quot;</span><span class="p">],</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;first_name&quot;</span><span class="p">],</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="user_annocement"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.user_annocement">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">user_annocement</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve the announcement of a specific user.</span>
+<span class="sd">    </span>
+<span class="sd">    This function is decorated with the @api_view decorator from the rest_framework package, which indicates that it is a RESTful API view. The [&#39;GET&#39;] argument specifies that the view can only handle HTTP GET requests.</span>
+<span class="sd">    </span>
+<span class="sd">    The function retrieves the Annoncement objects that are related to the current user, as specified by the request.user attribute. The user&#39;s ID is obtained from the request and used to filter the related Annoncement objects.</span>
+<span class="sd">    </span>
+<span class="sd">    The AnnoceSerializer is then used to serialize the filtered Annoncement objects, and the many=True argument is used to indicate that the serializer should handle multiple objects. The serialized data is returned in a Response object, which is a RESTful API response that contains the data and appropriate HTTP status code.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Response: A RESTful API response that contains the serialized data of the related Annoncement objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">annonce</span> <span class="o">=</span> <span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">user__id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span>
+        <span class="p">)</span>
+    <span class="n">serializer</span><span class="o">=</span><span class="n">AnnoceSerializer</span><span class="p">(</span><span class="n">annonce</span> <span class="p">,</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="create_Annocement"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.create_Annocement">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">create_Annocement</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates an announcement by using the data provided in the request. </span>
+<span class="sd">    </span>
+<span class="sd">    The following data is expected to be present in the request data:</span>
+<span class="sd">    - title: Title of the announcement</span>
+<span class="sd">    - area: Area of the property</span>
+<span class="sd">    - price: Price of the property</span>
+<span class="sd">    - description: Description of the property</span>
+<span class="sd">    - category: Category of the property</span>
+<span class="sd">    - type: Type of the property</span>
+<span class="sd">    - user.id: ID of the user creating the announcement</span>
+<span class="sd">    - firstName: First name of the person creating the announcement</span>
+<span class="sd">    - lastName: Last name of the person creating the announcement</span>
+<span class="sd">    - personal_address: Address of the person creating the announcement</span>
+<span class="sd">    - phoneNumber: Phone number of the person creating the announcement</span>
+<span class="sd">    - wilaya: Wilaya of the property</span>
+<span class="sd">    - commune: Commune of the property</span>
+<span class="sd">    - address: Address of the property</span>
+<span class="sd">    - images: Images of the property</span>
+<span class="sd">    - email: Email of the person creating the announcement</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    - HTTP 201 CREATED: If the announcement is successfully created</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">annoncement</span><span class="o">=</span><span class="n">servises</span><span class="o">.</span><span class="n">AnnouncemntManager</span><span class="o">.</span><span class="n">create_Announcement</span><span class="p">(</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;area&#39;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;firstName&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lastName&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;personal_address&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;phoneNumber&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;wilaya&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;commune&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;adress&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s1">&#39;images&#39;</span><span class="p">),</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">],</span>
+        
+
+        <span class="p">)</span>
+    <span class="n">serializer</span><span class="o">=</span> <span class="n">AnnoceSerializer</span><span class="p">(</span><span class="n">annoncement</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_201_CREATED</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="send_message"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.send_message">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">send_message</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Send a message.</span>
+<span class="sd">    </span>
+<span class="sd">    This API allows users to send messages to other users. To use this API, make a POST request </span>
+<span class="sd">    with the following parameters:</span>
+
+<span class="sd">    - sent_to: The user id of the recipient.</span>
+<span class="sd">    - content: The content of the message.</span>
+<span class="sd">    - title: The title of the message.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    A serialized representation of the message that was sent, along with a 201 status code.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    </span>
+<span class="sd">    POST /send_message/</span>
+<span class="sd">    {</span>
+<span class="sd">        &quot;sent_to&quot;: 2,</span>
+<span class="sd">        &quot;content&quot;: &quot;Hello, how are you?&quot;,</span>
+<span class="sd">        &quot;title&quot;: &quot;Greeting&quot;</span>
+<span class="sd">    }</span>
+<span class="sd">    </span>
+<span class="sd">    Response:</span>
+<span class="sd">    </span>
+<span class="sd">    {</span>
+<span class="sd">        &quot;id&quot;: 1,</span>
+<span class="sd">        &quot;sent_by&quot;: 1,</span>
+<span class="sd">        &quot;sent_to&quot;: 2,</span>
+<span class="sd">        &quot;content&quot;: &quot;Hello, how are you?&quot;,</span>
+<span class="sd">        &quot;title&quot;: &quot;Greeting&quot;,</span>
+<span class="sd">        &quot;created_at&quot;: &quot;2022-07-24T10:30:00Z&quot;</span>
+<span class="sd">    }</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">message</span><span class="o">=</span> <span class="n">servises</span><span class="o">.</span><span class="n">MessagManager</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;sent_to&#39;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">serializer</span><span class="o">=</span> <span class="n">MessageSerializer</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">HTTP_201_CREATED</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="all_announcemnt"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.all_announcemnt">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">all_announcemnt</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function implements the all_announcements endpoint that retrieves all the announcements stored in the database.</span>
+
+<span class="sd">    URL : /api/announcements/</span>
+
+<span class="sd">    Method : GET</span>
+
+<span class="sd">    Auth required : No</span>
+
+<span class="sd">    Permissions required : None</span>
+
+<span class="sd">    Data : None</span>
+
+<span class="sd">    Success Response</span>
+<span class="sd">    Code : 200 OK</span>
+
+<span class="sd">    Content :</span>
+
+<span class="sd">    perl</span>
+<span class="sd">    Copy code   </span>
+<span class="sd">    {</span>
+<span class="sd">        &quot;id&quot;: 1,</span>
+<span class="sd">        &quot;title&quot;: &quot;House for rent&quot;,</span>
+<span class="sd">        &quot;area&quot;: 100,</span>
+<span class="sd">        &quot;price&quot;: 1000,</span>
+<span class="sd">        &quot;description&quot;: &quot;A beautiful house for rent&quot;,</span>
+<span class="sd">        &quot;category&quot;: {</span>
+<span class="sd">            &quot;id&quot;: 1,</span>
+<span class="sd">            &quot;cat_name&quot;: &quot;Rental&quot;</span>
+<span class="sd">        },</span>
+<span class="sd">        &quot;type&quot;: {</span>
+<span class="sd">            &quot;id&quot;: 1,</span>
+<span class="sd">            &quot;type_name&quot;: &quot;House&quot;</span>
+<span class="sd">        },</span>
+<span class="sd">        &quot;user&quot;: {</span>
+<span class="sd">            &quot;id&quot;: 1,</span>
+<span class="sd">            &quot;email&quot;: &quot;john@example.com&quot;</span>
+<span class="sd">        },</span>
+<span class="sd">        &quot;created_at&quot;: &quot;2022-11-20T10:30:00Z&quot;,</span>
+<span class="sd">        &quot;updated_at&quot;: &quot;2022-11-20T10:30:00Z&quot;,</span>
+<span class="sd">        &quot;firstName&quot;: &quot;John&quot;,</span>
+<span class="sd">        &quot;lastName&quot;: &quot;Doe&quot;,</span>
+<span class="sd">        &quot;personal_address&quot;: &quot;1234 Main St.&quot;,</span>
+<span class="sd">        &quot;phoneNumber&quot;: &quot;555-555-5555&quot;,</span>
+<span class="sd">        &quot;wilaya&quot;: {</span>
+<span class="sd">            &quot;id&quot;: 1,</span>
+<span class="sd">            &quot;designation&quot;: &quot;Algiers&quot;</span>
+<span class="sd">        },</span>
+<span class="sd">        &quot;commune&quot;: {</span>
+<span class="sd">            &quot;id&quot;: 1,</span>
+<span class="sd">            &quot;designation&quot;: &quot;Baba Hassen&quot;</span>
+<span class="sd">        },</span>
+<span class="sd">        &quot;adress&quot;: {</span>
+<span class="sd">            &quot;id&quot;: 1,</span>
+<span class="sd">            &quot;address&quot;: &quot;123 Main St.&quot;</span>
+<span class="sd">        }</span>
+<span class="sd">    }</span>
+<span class="sd">    Notes</span>
+<span class="sd">    The response contains all the announcements stored in the database.</span>
+<span class="sd">    The category field holds the category of the announcement.</span>
+<span class="sd">    The type field holds the type of the announcement.</span>
+<span class="sd">    The user field holds the user who posted the announcement.</span>
+<span class="sd">    The wilaya field holds the wilaya of the announcement.</span>
+<span class="sd">    The commune field holds the commune of the announcement.</span>
+<span class="sd">    The adress field holds the address of the announcement.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">annonce</span> <span class="o">=</span><span class="n">servises</span><span class="o">.</span><span class="n">AnnouncemntManager</span><span class="o">.</span><span class="n">get_announcements</span><span class="p">()</span>
+    <span class="n">serializer</span><span class="o">=</span><span class="n">AnnoceSerializer</span><span class="p">(</span><span class="n">annonce</span> <span class="p">,</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="delete_announcemnt"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.delete_announcemnt">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span> 
+<span class="k">def</span> <span class="nf">delete_announcemnt</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="nb">id</span><span class="p">):</span>   
+    <span class="n">servises</span><span class="o">.</span><span class="n">AnnouncemntManager</span><span class="o">.</span><span class="n">delete_announcement</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_200_OK</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="find_user"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.find_user">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span> 
+<span class="k">def</span> <span class="nf">find_user</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span><span class="n">servises</span><span class="o">.</span><span class="n">AuthManager</span><span class="o">.</span><span class="n">find_user</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">serializer</span><span class="o">=</span><span class="n">UserSerializer</span><span class="p">(</span><span class="n">user</span> <span class="p">,</span><span class="n">many</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="add_favorate"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.add_favorate">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;post&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">add_favorate</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">servises</span><span class="o">.</span><span class="n">FavoriteManager</span><span class="o">.</span><span class="n">add_favorate</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;id_announcement&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_200_OK</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="remove_favorate"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.remove_favorate">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;post&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">remove_favorate</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">servises</span><span class="o">.</span><span class="n">FavoriteManager</span><span class="o">.</span><span class="n">remove_favorate</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span><span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;id_announcement&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_200_OK</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="search_filter"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.search_filter">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">search_filter</span><span class="p">(</span><span class="n">request</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">annonce</span> <span class="o">=</span> <span class="n">servises</span><span class="o">.</span><span class="n">AnnouncemntManager</span><span class="o">.</span><span class="n">search_filter</span><span class="p">(</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;search&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;commune&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;wilaya&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;first_date&quot;</span><span class="p">],</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;second_date&quot;</span><span class="p">],)</span>
+    <span class="n">serializer</span><span class="o">=</span><span class="n">AnnoceSerializer</span><span class="p">(</span><span class="n">annonce</span> <span class="p">,</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_recieved_messages"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.get_recieved_messages">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_recieved_messages</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">messages</span><span class="o">=</span> <span class="n">servises</span><span class="o">.</span><span class="n">MessagManager</span><span class="o">.</span><span class="n">get_my_messages</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">serializer</span><span class="o">=</span><span class="n">MessageSerializer</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;nb_unread_messages&quot;</span><span class="p">:</span><span class="n">servises</span><span class="o">.</span><span class="n">MessagManager</span><span class="o">.</span><span class="n">unread_messages</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">),</span>
+        <span class="s2">&quot;recieved_messages&quot;</span><span class="p">:</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_sent_messages"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.get_sent_messages">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_sent_messages</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">messages</span><span class="o">=</span> <span class="n">servises</span><span class="o">.</span><span class="n">MessagManager</span><span class="o">.</span><span class="n">get_sent_messages</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">serializer</span><span class="o">=</span> <span class="n">MessageSerializer</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_my_fav"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.get_my_fav">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_my_fav</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">fav</span><span class="o">=</span> <span class="n">servises</span><span class="o">.</span><span class="n">FavoriteManager</span><span class="o">.</span><span class="n">get_my_favorites</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">serializer</span><span class="o">=</span> <span class="n">AnnoceSerializer</span><span class="p">(</span><span class="n">fav</span><span class="p">,</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="get_announcement"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.get_announcement">[docs]</a><span class="nd">@api_view</span><span class="p">([</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_announcement</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">annonce</span> <span class="o">=</span><span class="n">servises</span><span class="o">.</span><span class="n">AnnouncemntManager</span><span class="o">.</span><span class="n">get_announcement</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="n">serializer</span><span class="o">=</span><span class="n">AnnoceSerializer</span><span class="p">(</span><span class="n">annonce</span> <span class="p">,</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="viewsets_wilayas"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.viewsets_wilayas">[docs]</a><span class="k">class</span> <span class="nc">viewsets_wilayas</span><span class="p">(</span><span class="n">viewsets</span><span class="o">.</span><span class="n">ModelViewSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of viewsets.ModelViewSet from the Django Rest Framework library. </span>
+
+<span class="sd">    The serializer_class attribute specifies the serializer class to use for handling serialization and deserialization of the Wilaya model. </span>
+<span class="sd">    In this case, the serializer_class is set to WilayaSerializer.</span>
+
+<span class="sd">    The search_fields attribute specifies the fields that should be searched when the viewset performs a search operation. </span>
+<span class="sd">    In this case, the value [&#39;designation&#39;] indicates that only the designation field of the Wilaya model should be searched.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">queryset</span><span class="o">=</span><span class="n">Wilaya</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">serializer_class</span><span class="o">=</span><span class="n">WilayaSerializer</span>
+    <span class="n">search_fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;designation&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="viewsets_commune"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.viewsets_commune">[docs]</a><span class="k">class</span> <span class="nc">viewsets_commune</span><span class="p">(</span><span class="n">viewsets</span><span class="o">.</span><span class="n">ModelViewSet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of viewsets.ModelViewSet from the Django Rest Framework library. </span>
+<span class="sd">    </span>
+<span class="sd">    The serializer_class attribute specifies the serializer class to use for handling serialization and deserialization of commune model. </span>
+<span class="sd">    In this case, the serializer_class is set to communeSerializer.</span>
+
+<span class="sd">    The search_fields attribute specifies the fields that should be searched when the viewset performs a search operation. </span>
+<span class="sd">    In this case, the value [&#39;designation&#39;] indicates that only the designation field of the commune model should be searched.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">queryset</span><span class="o">=</span><span class="n">Commune</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">serializer_class</span><span class="o">=</span><span class="n">CommuneSerializer</span>
+    <span class="n">filter_backends</span><span class="o">=</span><span class="p">[</span><span class="n">filters</span><span class="o">.</span><span class="n">SearchFilter</span><span class="p">]</span>
+    <span class="n">search_fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;designation&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="viewsets_type"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.viewsets_type">[docs]</a><span class="k">class</span> <span class="nc">viewsets_type</span><span class="p">(</span><span class="n">viewsets</span><span class="o">.</span><span class="n">ModelViewSet</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of viewsets.ModelViewSet from the Django Rest Framework library. </span>
+<span class="sd">    </span>
+<span class="sd">    The serializer_class attribute specifies the serializer class to use for handling serialization and deserialization of commune model. </span>
+<span class="sd">    In this case, the serializer_class is set to TypeSerializer.</span>
+
+<span class="sd">    The search_fields attribute specifies the fields that should be searched when the viewset performs a search operation. </span>
+<span class="sd">    In this case, the value [&#39;designation&#39;] indicates that only the designation field of the Type model should be searched.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">queryset</span><span class="o">=</span><span class="n">Type</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">serializer_class</span><span class="o">=</span><span class="n">TypeSerializer</span>
+    <span class="n">filter_backends</span><span class="o">=</span><span class="p">[</span><span class="n">filters</span><span class="o">.</span><span class="n">SearchFilter</span><span class="p">]</span>
+    <span class="n">search_fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;type_name&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="viewsets_category"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.viewsets_category">[docs]</a><span class="k">class</span> <span class="nc">viewsets_category</span><span class="p">(</span><span class="n">viewsets</span><span class="o">.</span><span class="n">ModelViewSet</span><span class="p">):</span> 
+    <span class="n">queryset</span><span class="o">=</span><span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">serializer_class</span><span class="o">=</span><span class="n">CategorySerializer</span>
+    <span class="n">filter_backends</span><span class="o">=</span><span class="p">[</span><span class="n">filters</span><span class="o">.</span><span class="n">SearchFilter</span><span class="p">]</span>
+    <span class="n">search_fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cat_name &#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="viewsets_message"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.viewsets_message">[docs]</a><span class="k">class</span> <span class="nc">viewsets_message</span><span class="p">(</span><span class="n">viewsets</span><span class="o">.</span><span class="n">ModelViewSet</span><span class="p">):</span>
+    <span class="n">queryset</span><span class="o">=</span> <span class="n">Messages</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">serializer_class</span><span class="o">=</span> <span class="n">MessageSerializer</span>
+    <span class="n">search_fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">,</span><span class="s1">&#39;sent_by&#39;</span><span class="p">,</span><span class="s1">&#39;sent_to&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="viewsets_message.retrieve"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.views.viewsets_message.retrieve">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">Messages</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">queryset</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">pk</span><span class="p">)</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">status</span><span class="o">=</span><span class="s1">&#39;Read&#39;</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">serializer</span> <span class="o">=</span> <span class="n">MessageSerializer</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">serializer</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2023, m.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

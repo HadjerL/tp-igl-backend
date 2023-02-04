@@ -1,126 +1,74 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets, filters
 from rest_framework.response import Response
-from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer, AddressSerializer, LocationSerializer,UserSerializer, MessageSerializer, CategorySerializer
-from .models import Annoncement, Type, Commune, Location, Wilaya,Address, Messages, Category
+from .serilizers import AnnoceSerializer, TypeSerializer, CommuneSerializer, WilayaSerializer,UserSerializer, MessageSerializer, CategorySerializer
+from .models import Annoncement, Type, Commune, Wilaya, Messages, Category
 from rest_framework.permissions import AllowAny
 from gestionAnnonce import servises
 from django.shortcuts import get_object_or_404
 
-#===================================================================================================================
-#                                                 FILTERED QUERYSETS
-#===================================================================================================================
 
+@api_view(['Post'])
+@permission_classes([AllowAny])
+def Login(request):
+    """
+    This view function logs in a user.
+    
+    Args:
+        request: a Request object containing data for login, including "email", "family_name", "first_name", and "image".
+        
+    Returns:
+        A Response object containing the result of the login.
+    """
+    return Response(servises.AuthManager.login(request.data["email"],request.data["family_name"],request.data["first_name"],request.data["image"]))
 
 @api_view(['GET'])
 def user_annocement(request):
+    """
+    Retrieve the announcement of a specific user.
+    
+    This function is decorated with the @api_view decorator from the rest_framework package, which indicates that it is a RESTful API view. The ['GET'] argument specifies that the view can only handle HTTP GET requests.
+    
+    The function retrieves the Annoncement objects that are related to the current user, as specified by the request.user attribute. The user's ID is obtained from the request and used to filter the related Annoncement objects.
+    
+    The AnnoceSerializer is then used to serialize the filtered Annoncement objects, and the many=True argument is used to indicate that the serializer should handle multiple objects. The serialized data is returned in a Response object, which is a RESTful API response that contains the data and appropriate HTTP status code.
+    
+    Returns:
+        Response: A RESTful API response that contains the serialized data of the related Annoncement objects.
+    """
+
     annonce = Annoncement.objects.filter(
         user__id = request.user.id
         )
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
-def find_annocement_type(request,type):
-    annonce = Annoncement.objects.filter(
-        type__type_name__iexact = type
-        )
-    serializer=AnnoceSerializer(annonce ,many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-def find_annocement_wilaya(request,wilaya):
-    annonce = Annoncement.objects.filter(
-        location__wilaya__designation__iexact = wilaya
-        )
-    serializer=AnnoceSerializer(annonce ,many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-def find_annocement_commune(request,commune):
-    annonce = Annoncement.objects.filter(
-        location__commune__designation__iexact=commune
-        )
-    serializer=AnnoceSerializer(annonce ,many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-def find_annocement_category(request,category):
-    annonce = Annoncement.objects.filter(
-        category__cat_name =category
-        )
-    serializer=AnnoceSerializer(annonce ,many=True)
-    return Response(serializer.data)
-
-#===================================================================================================================
-#                                                         VIEWSETS
-#===================================================================================================================
-
-class viewsets_annoncement(viewsets.ModelViewSet):
-    queryset=Annoncement.objects.all().order_by('creation_date')
-    serializer_class=AnnoceSerializer
-    filter_backends=[filters.SearchFilter]
-    search_fields=['type__type_name',
-    'location__wilaya__designation',
-    'location__commune__designation',
-    'category__cat_name ',
-    'description',
-    'title'
-    ]
-    
-
-class viewsets_wilayas(viewsets.ModelViewSet):
-    queryset=Wilaya.objects.all()
-    serializer_class=WilayaSerializer
-    search_fields=['designation']
-
-class viewsets_commune(viewsets.ModelViewSet):
-    queryset=Commune.objects.all()
-    serializer_class=CommuneSerializer
-    filter_backends=[filters.SearchFilter]
-    search_fields=['designation']
-
-class viewsets_type(viewsets.ModelViewSet): 
-    queryset=Type.objects.all()
-    serializer_class=TypeSerializer
-    filter_backends=[filters.SearchFilter]
-    search_fields=['type_name']
-
-class viewsets_category(viewsets.ModelViewSet): 
-    queryset=Category.objects.all()
-    serializer_class=CategorySerializer
-    filter_backends=[filters.SearchFilter]
-    search_fields=['cat_name ']
-
-class viewsets_address(viewsets.ModelViewSet):
-    queryset= Address.objects.all()
-    serializer_class=AddressSerializer
-    search_fields=['address']
-
-class viewsets_location(viewsets.ModelViewSet):
-    queryset= Location.objects.all()
-    serializer_class= LocationSerializer
-    search_fields=['address__address']
-
-class viewsets_message(viewsets.ModelViewSet):
-    queryset= Messages.objects.all()
-    serializer_class= MessageSerializer
-    search_fields=['content','sent_by','sent_to']
-
-    def retrieve(self, request, pk=None):
-        queryset = Messages.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
-        user.status='Read'
-        user.save()
-        serializer = MessageSerializer(user)
-        return Response(serializer.data)
-
-#===================================================================================================================
-#                                                 UPDATING AND CREATING
-#===================================================================================================================
-
 @api_view(['POST'])
 def create_Annocement(request):
+    """
+    Creates an announcement by using the data provided in the request. 
+    
+    The following data is expected to be present in the request data:
+    - title: Title of the announcement
+    - area: Area of the property
+    - price: Price of the property
+    - description: Description of the property
+    - category: Category of the property
+    - type: Type of the property
+    - user.id: ID of the user creating the announcement
+    - firstName: First name of the person creating the announcement
+    - lastName: Last name of the person creating the announcement
+    - personal_address: Address of the person creating the announcement
+    - phoneNumber: Phone number of the person creating the announcement
+    - wilaya: Wilaya of the property
+    - commune: Commune of the property
+    - address: Address of the property
+    - images: Images of the property
+    - email: Email of the person creating the announcement
+    
+    Returns:
+    - HTTP 201 CREATED: If the announcement is successfully created
+    """
     annoncement=servises.AnnouncemntManager.create_Announcement(
         request.data["title"],
         request.data['area'],
@@ -144,30 +92,42 @@ def create_Annocement(request):
     serializer= AnnoceSerializer(annoncement)
     return Response(serializer.data,status=status.HTTP_201_CREATED) 
 
-# @api_view(['PUT'])
-# def modify_Announcement(request,id):
-#     annoncement=servises.AnnouncemntManager.modify_Announcement(
-#         request.data["title"],
-#         request.data['area'],
-#         request.data['price'],
-#         request.data['description'],
-#         request.data['id_category'],
-#         request.data['id_type'],
-#         request.data["name"],
-#         request.data["last_name"],
-#         request.data["personal_address"],
-#         request.data["phone"],
-#         request.data["id_wilaya"],
-#         request.data["id_commune"],
-#         request.FILES.getlist('images'),
-#         request.data["address"],
-
-#         )
-#     serializer= AnnoceSerializer(annoncement)
-#     return Response(serializer.data,status=status.HTTP_201_CREATED) 
-
 @api_view(['POST'])
 def send_message(request):
+    """
+    Send a message.
+    
+    This API allows users to send messages to other users. To use this API, make a POST request 
+    with the following parameters:
+
+    - sent_to: The user id of the recipient.
+    - content: The content of the message.
+    - title: The title of the message.
+    
+    Returns:
+    A serialized representation of the message that was sent, along with a 201 status code.
+
+    Example:
+    
+    POST /send_message/
+    {
+        "sent_to": 2,
+        "content": "Hello, how are you?",
+        "title": "Greeting"
+    }
+    
+    Response:
+    
+    {
+        "id": 1,
+        "sent_by": 1,
+        "sent_to": 2,
+        "content": "Hello, how are you?",
+        "title": "Greeting",
+        "created_at": "2022-07-24T10:30:00Z"
+    }
+    
+    """
     message= servises.MessagManager.send_message(
         request.user.id,
         request.data['sent_to'],
@@ -177,18 +137,77 @@ def send_message(request):
     serializer= MessageSerializer(message)
     return Response(serializer.data, status= status.HTTP_201_CREATED)
 
-@api_view(['Post'])
-@permission_classes([AllowAny])
-def Login(request):
-    return Response(servises.AuthManager.login(request.data["email"],request.data["family_name"],request.data["first_name"],request.data["image"]))
-
-
 @api_view(['GET'])
 def all_announcemnt(request):
+    """
+    This function implements the all_announcements endpoint that retrieves all the announcements stored in the database.
+
+    URL : /api/announcements/
+
+    Method : GET
+
+    Auth required : No
+
+    Permissions required : None
+
+    Data : None
+
+    Success Response
+    Code : 200 OK
+
+    Content :
+
+    perl
+    Copy code   
+    {
+        "id": 1,
+        "title": "House for rent",
+        "area": 100,
+        "price": 1000,
+        "description": "A beautiful house for rent",
+        "category": {
+            "id": 1,
+            "cat_name": "Rental"
+        },
+        "type": {
+            "id": 1,
+            "type_name": "House"
+        },
+        "user": {
+            "id": 1,
+            "email": "john@example.com"
+        },
+        "created_at": "2022-11-20T10:30:00Z",
+        "updated_at": "2022-11-20T10:30:00Z",
+        "firstName": "John",
+        "lastName": "Doe",
+        "personal_address": "1234 Main St.",
+        "phoneNumber": "555-555-5555",
+        "wilaya": {
+            "id": 1,
+            "designation": "Algiers"
+        },
+        "commune": {
+            "id": 1,
+            "designation": "Baba Hassen"
+        },
+        "adress": {
+            "id": 1,
+            "address": "123 Main St."
+        }
+    }
+    Notes
+    The response contains all the announcements stored in the database.
+    The category field holds the category of the announcement.
+    The type field holds the type of the announcement.
+    The user field holds the user who posted the announcement.
+    The wilaya field holds the wilaya of the announcement.
+    The commune field holds the commune of the announcement.
+    The adress field holds the address of the announcement.
+    """
     annonce =servises.AnnouncemntManager.get_announcements()
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
-
 
 @api_view(['GET']) 
 def delete_announcemnt(request,id):   
@@ -253,3 +272,70 @@ def get_announcement(request,id):
     annonce =servises.AnnouncemntManager.get_announcement(id)
     serializer=AnnoceSerializer(annonce ,many=True)
     return Response(serializer.data)
+
+
+class viewsets_wilayas(viewsets.ModelViewSet):
+    """
+    This class is a subclass of viewsets.ModelViewSet from the Django Rest Framework library. 
+
+    The serializer_class attribute specifies the serializer class to use for handling serialization and deserialization of the Wilaya model. 
+    In this case, the serializer_class is set to WilayaSerializer.
+
+    The search_fields attribute specifies the fields that should be searched when the viewset performs a search operation. 
+    In this case, the value ['designation'] indicates that only the designation field of the Wilaya model should be searched.
+    """
+
+    queryset=Wilaya.objects.all()
+    serializer_class=WilayaSerializer
+    search_fields=['designation']
+
+class viewsets_commune(viewsets.ModelViewSet):
+    """
+    This class is a subclass of viewsets.ModelViewSet from the Django Rest Framework library. 
+    
+    The serializer_class attribute specifies the serializer class to use for handling serialization and deserialization of commune model. 
+    In this case, the serializer_class is set to communeSerializer.
+
+    The search_fields attribute specifies the fields that should be searched when the viewset performs a search operation. 
+    In this case, the value ['designation'] indicates that only the designation field of the commune model should be searched.
+    """
+    queryset=Commune.objects.all()
+    serializer_class=CommuneSerializer
+    filter_backends=[filters.SearchFilter]
+    search_fields=['designation']
+
+class viewsets_type(viewsets.ModelViewSet): 
+    """
+    This class is a subclass of viewsets.ModelViewSet from the Django Rest Framework library. 
+    
+    The serializer_class attribute specifies the serializer class to use for handling serialization and deserialization of commune model. 
+    In this case, the serializer_class is set to TypeSerializer.
+
+    The search_fields attribute specifies the fields that should be searched when the viewset performs a search operation. 
+    In this case, the value ['designation'] indicates that only the designation field of the Type model should be searched.
+    """
+    queryset=Type.objects.all()
+    serializer_class=TypeSerializer
+    filter_backends=[filters.SearchFilter]
+    search_fields=['type_name']
+
+class viewsets_category(viewsets.ModelViewSet): 
+    queryset=Category.objects.all()
+    serializer_class=CategorySerializer
+    filter_backends=[filters.SearchFilter]
+    search_fields=['cat_name ']
+
+
+class viewsets_message(viewsets.ModelViewSet):
+    queryset= Messages.objects.all()
+    serializer_class= MessageSerializer
+    search_fields=['content','sent_by','sent_to']
+
+    def retrieve(self, request, pk=None):
+        queryset = Messages.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        user.status='Read'
+        user.save()
+        serializer = MessageSerializer(user)
+        return Response(serializer.data)
+

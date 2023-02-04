@@ -1,0 +1,656 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>gestionAnnonce.servises &mdash; announcementproject_backend 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> announcementproject_backend
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">annonces_immobilieres</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">announcementproject_backend</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>gestionAnnonce.servises</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gestionAnnonce.servises</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Annoncement</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Contact</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">AnnoncementImage</span><span class="p">,</span> <span class="n">Commune</span><span class="p">,</span> <span class="n">Location</span><span class="p">,</span> <span class="n">Wilaya</span><span class="p">,</span><span class="n">Address</span><span class="p">,</span><span class="n">User</span><span class="p">,</span><span class="n">Token</span><span class="p">,</span> <span class="n">Messages</span>
+<span class="kn">from</span> <span class="nn">.interface</span> <span class="kn">import</span> <span class="n">Iannouncement</span><span class="p">,</span><span class="n">Iauth</span>
+<span class="kn">from</span> <span class="nn">geopy.geocoders</span> <span class="kn">import</span> <span class="n">Nominatim</span>
+<span class="kn">from</span> <span class="nn">validate_email</span> <span class="kn">import</span> <span class="n">validate_email</span>
+<span class="kn">import</span> <span class="nn">geopy.geocoders</span>
+<span class="kn">from</span> <span class="nn">django.db.models.signals</span> <span class="kn">import</span> <span class="n">post_save</span>
+<span class="kn">from</span> <span class="nn">django.dispatch</span> <span class="kn">import</span> <span class="n">receiver</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="n">geopy</span><span class="o">.</span><span class="n">geocoders</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">default_timeout</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="kn">from</span> <span class="nn">django.core.files.uploadedfile</span> <span class="kn">import</span> <span class="n">InMemoryUploadedFile</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="kn">import</span> <span class="n">Q</span>
+
+
+
+
+<div class="viewcode-block" id="LocationManager"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.LocationManager">[docs]</a><span class="k">class</span> <span class="nc">LocationManager</span><span class="p">():</span>
+
+<div class="viewcode-block" id="LocationManager.get_cities"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.LocationManager.get_cities">[docs]</a>    <span class="k">def</span> <span class="nf">get_cities</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function reads from a file &#39;algeria_cities.json&#39; which contains a list of cities in Algeria, and creates objects in the database for each wilaya and its corresponding commune.</span>
+<span class="sd">    </span>
+<span class="sd">        Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">        </span>
+<span class="sd">        Example:</span>
+<span class="sd">            Suppose the file &#39;algeria_cities.json&#39; contains the following data:</span>
+<span class="sd">            [{&quot;wilaya_name&quot;: &quot;Algiers&quot;,&quot;commune_name&quot;: &quot;Baba Hassen&quot;},{&quot;wilaya_name&quot;: &quot;Oran&quot;,&quot;commune_name&quot;: &quot;Arzew&quot;},{&quot;wilaya_name&quot;: &quot;Algiers&quot;,&quot;commune_name&quot;: &quot;Hydra&quot;}]</span>
+<span class="sd">        </span>
+<span class="sd">            When the function get_cities() is called, it will create two objects for the two distinct wilayas &quot;Algiers&quot; and &quot;Oran&quot;, and two objects for the two communes &quot;Baba Hassen&quot; and &quot;Arzew&quot;, linking each commune to its corresponding wilaya.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;algeria_cities.json&#39;</span><span class="p">,</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+        <span class="n">algeria_cities</span><span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">algeria_cities</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">commune</span> <span class="ow">in</span> <span class="n">algeria_cities</span><span class="p">:</span>
+            <span class="n">Wilaya</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+                <span class="n">designation</span><span class="o">=</span><span class="n">commune</span><span class="p">[</span><span class="s2">&quot;wilaya_name&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">commune</span> <span class="ow">in</span> <span class="n">algeria_cities</span><span class="p">:</span>
+            <span class="n">Commune</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+            <span class="n">designation</span><span class="o">=</span><span class="n">commune</span><span class="p">[</span><span class="s2">&quot;commune_name&quot;</span><span class="p">],</span>
+            <span class="n">wilaya</span><span class="o">=</span><span class="n">Wilaya</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">designation</span><span class="o">=</span><span class="n">commune</span><span class="p">[</span><span class="s2">&quot;wilaya_name&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">algeria_cities</span><span class="p">)</span></div>
+    <span class="c1"># get_cities()</span>
+    <span class="c1"># del get_cities</span>
+
+<div class="viewcode-block" id="LocationManager.get_coordinates"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.LocationManager.get_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="n">address</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function takes a string argument representing an address,</span>
+<span class="sd">        uses the Nominatim geolocator to retrieve its latitude and longitude,</span>
+<span class="sd">        and returns them in a dictionary with the keys &#39;lat&#39; and &#39;long&#39;.</span>
+<span class="sd">    </span>
+<span class="sd">        :param address: str - A string representing an address</span>
+<span class="sd">        :return: dict - A dictionary with keys &#39;lat&#39; and &#39;long&#39; containing the latitude and longitude of the address</span>
+<span class="sd">    </span>
+<span class="sd">        Example:</span>
+<span class="sd">        &gt;&gt;&gt; get_coordinates(&quot;1600 Amphitheatre Parkway, Mountain View, CA&quot;)</span>
+<span class="sd">        {&#39;lat&#39;: 37.4219999, &#39;long&#39;: -122.0840575}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geolocator</span> <span class="o">=</span> <span class="n">Nominatim</span><span class="p">(</span><span class="n">user_agent</span><span class="o">=</span><span class="s2">&quot;gestionAnnonce&quot;</span><span class="p">)</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">geolocator</span><span class="o">.</span><span class="n">geocode</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+        <span class="n">latitude</span><span class="o">=</span> <span class="n">location</span><span class="o">.</span><span class="n">latitude</span>
+        <span class="n">longitude</span><span class="o">=</span> <span class="n">location</span><span class="o">.</span><span class="n">longitude</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">location</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">latitude</span><span class="p">,</span>
+            <span class="s2">&quot;long&quot;</span><span class="p">:</span> <span class="n">longitude</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">data</span>   </div>
+
+
+<div class="viewcode-block" id="LocationManager.creatLocation"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.LocationManager.creatLocation">[docs]</a>    <span class="k">def</span> <span class="nf">creatLocation</span><span class="p">(</span><span class="n">commune</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">id_wilaya</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">address</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function creates a new Location object by using a commune name, wilaya id, and an address string.</span>
+<span class="sd">    </span>
+<span class="sd">        :param commune: The name of the commune where the location is situated.</span>
+<span class="sd">        :type commune: str</span>
+<span class="sd">        :param id_wilaya: The id of the wilaya where the location is situated.</span>
+<span class="sd">        :type id_wilaya: int</span>
+<span class="sd">        :param address: The address of the location.</span>
+<span class="sd">        :type address: str</span>
+<span class="sd">        :return: The newly created Location object.</span>
+<span class="sd">        :rtype: Location</span>
+<span class="sd">    </span>
+<span class="sd">        Example:</span>
+<span class="sd">        &gt;&gt;&gt; location = createLocation(&quot;Oran&quot;, 31, &quot;Avenue Hassan Badi, Oran, Algeria&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; print(location.wilaya.designation)</span>
+<span class="sd">        Oran</span>
+<span class="sd">        &gt;&gt;&gt; print(location.commune.designation)</span>
+<span class="sd">        Oran</span>
+<span class="sd">        &gt;&gt;&gt; print(location.address.address)</span>
+<span class="sd">        Avenue Hassan Badi, Oran, Algeria</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">wilaya</span><span class="o">=</span> <span class="n">Wilaya</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">id_wilaya</span><span class="p">)</span>
+            <span class="n">commune</span><span class="o">=</span> <span class="n">Commune</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">designation__iexact</span>  <span class="o">=</span><span class="n">commune</span><span class="p">)</span>
+        <span class="k">except</span>  <span class="n">Wilaya</span><span class="o">.</span><span class="n">DoesNotExist</span> <span class="ow">or</span> <span class="n">Commune</span><span class="o">.</span><span class="n">DoesNotExist</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+        <span class="n">location</span><span class="o">=</span><span class="n">Location</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">wilaya</span><span class="o">=</span><span class="n">wilaya</span><span class="p">,</span>
+            <span class="n">commune</span><span class="o">=</span><span class="n">commune</span><span class="p">,</span>
+            <span class="n">address</span><span class="o">=</span><span class="n">Address</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">address</span><span class="o">=</span> <span class="n">address</span><span class="p">,</span>
+                <span class="n">latitude</span><span class="o">=</span> <span class="n">LocationManager</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">address</span><span class="p">)[</span><span class="s2">&quot;lat&quot;</span><span class="p">],</span>
+                <span class="n">longitude</span><span class="o">=</span><span class="n">LocationManager</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">(</span><span class="n">address</span><span class="p">)[</span><span class="s2">&quot;long&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">location</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="AuthManager"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AuthManager">[docs]</a><span class="k">class</span> <span class="nc">AuthManager</span><span class="p">(</span><span class="n">Iauth</span><span class="p">):</span>
+    <span class="c1">#create token to each new user</span>
+<div class="viewcode-block" id="AuthManager.create_auth_token"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AuthManager.create_auth_token">[docs]</a>    <span class="nd">@receiver</span><span class="p">(</span><span class="n">post_save</span><span class="p">,</span> <span class="n">sender</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_auth_token</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">created</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function creates an authentication token for a user whenever a new user is created.</span>
+<span class="sd">        :param sender: The sender of the signal (User model)</span>
+<span class="sd">        :type sender: class</span>
+<span class="sd">        :param instance: The instance of the User model that triggered the signal</span>
+<span class="sd">        :type instance: User</span>
+<span class="sd">        :param created: Boolean indicating if the User instance was just created or not</span>
+<span class="sd">        :type created: bool</span>
+<span class="sd">        :param kwargs: Additional keyword arguments</span>
+<span class="sd">        :type kwargs: dict</span>
+<span class="sd">        :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">created</span><span class="p">:</span>
+            <span class="n">Token</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">instance</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="AuthManager.login"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AuthManager.login">[docs]</a>    <span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">email</span><span class="p">,</span><span class="n">family_name</span> <span class="p">,</span><span class="n">first_name</span><span class="p">,</span><span class="n">image</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            this function returns a token (if user doesn&#39;t exit create user ) </span>
+<span class="sd">            :param email: email of user</span>
+<span class="sd">            :type email: str</span>
+<span class="sd">            :param family_name: user family_name</span>
+<span class="sd">            :type family_name: str</span>
+<span class="sd">            :param first_name: user first_name</span>
+<span class="sd">            :type first_name: str</span>
+<span class="sd">            :param image: user profile picture </span>
+<span class="sd">            :type image: file</span>
+<span class="sd">            </span>
+<span class="sd">            :return: token</span>
+<span class="sd">            :rtype: str</span>
+
+<span class="sd">            example:</span>
+<span class="sd">            &gt;&gt;&gt; login(email=&quot;ki_haissam@esi.dz&quot;,family_name=&quot;imane&quot; ,first_name=&quot;imane&quot;,image=&quot;&quot;)</span>
+<span class="sd">            b0c4fee72c79e69a878b4d9c0127c5f9404b91a8</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="p">:</span>
+            <span class="n">token</span> <span class="o">=</span><span class="n">Token</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> 
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">is_valid</span> <span class="o">=</span><span class="n">validate_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+            <span class="k">if</span>  <span class="n">is_valid</span> <span class="p">:</span>
+                <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">,</span><span class="n">first_name</span><span class="o">=</span><span class="n">first_name</span><span class="p">,</span><span class="n">family_name</span><span class="o">=</span><span class="n">family_name</span><span class="p">,</span><span class="n">image</span><span class="o">=</span><span class="n">image</span><span class="p">)</span>
+                <span class="n">token</span> <span class="o">=</span><span class="n">Token</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">))</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">key</span> <span class="p">)</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="k">return</span> <span class="mi">500</span></div>
+
+<div class="viewcode-block" id="AuthManager.find_user"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AuthManager.find_user">[docs]</a>    <span class="k">def</span> <span class="nf">find_user</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function takes an id as input and returns the User object with the given id.</span>
+
+<span class="sd">        :param id: The id of the user to be retrieved.</span>
+<span class="sd">        :type id: int</span>
+<span class="sd">        :return: The User object with the given id.</span>
+<span class="sd">        :rtype: User</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">))</span></div></div>
+
+<div class="viewcode-block" id="AnnouncemntManager"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AnnouncemntManager">[docs]</a><span class="k">class</span> <span class="nc">AnnouncemntManager</span> <span class="p">(</span><span class="n">Iannouncement</span><span class="p">):</span>
+
+<div class="viewcode-block" id="AnnouncemntManager.create_Announcement"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AnnouncemntManager.create_Announcement">[docs]</a>    <span class="k">def</span> <span class="nf">create_Announcement</span><span class="p">(</span><span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">area</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">price</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">description</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">id_category</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">id_type</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">id_user</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">last_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">personal_address</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">phone</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">id_wilaya</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">commune</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">address</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">uploaded_images</span><span class="p">,</span><span class="n">email</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an announcement.</span>
+
+<span class="sd">        :param title: Title of the announcement</span>
+<span class="sd">        :param area: Area in square meters</span>
+<span class="sd">        :param price: Price in Algerian dinars</span>
+<span class="sd">        :param description: Description of the announcement</span>
+<span class="sd">        :param id_category: Category id of the announcement</span>
+<span class="sd">        :param id_type: Type id of the announcement</span>
+<span class="sd">        :param id_user: User id of the announcement&#39;s creator</span>
+<span class="sd">        :param name: First name of the contact person</span>
+<span class="sd">        :param last_name: Last name of the contact person</span>
+<span class="sd">        :param personal_address: Address of the contact person</span>
+<span class="sd">        :param phone: Phone number of the contact person</span>
+<span class="sd">        :param id_wilaya: Wilaya id of the location</span>
+<span class="sd">        :param commune: Commune of the location</span>
+<span class="sd">        :param address: Address of the location</span>
+<span class="sd">        :param uploaded_images: Images uploaded for the announcement</span>
+<span class="sd">        :param email: Email of the contact person</span>
+<span class="sd">        :return: Created announcement object</span>
+
+<span class="sd">        :raises: ValueError if category, type, or user with the specified ids does not exist</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">category</span><span class="o">=</span> <span class="n">Category</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">id_category</span><span class="p">)</span>
+            <span class="nb">type</span><span class="o">=</span> <span class="n">Type</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">id_type</span><span class="p">)</span>
+            <span class="n">user</span><span class="o">=</span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Category</span><span class="o">.</span><span class="n">DoesNotExist</span> <span class="ow">or</span> <span class="n">Type</span><span class="o">.</span><span class="n">DoesNotExist</span> <span class="ow">or</span> <span class="n">User</span><span class="o">.</span><span class="n">DoesNotExist</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+        
+        <span class="n">annonce</span> <span class="o">=</span> <span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span> <span class="n">title</span><span class="p">,</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="n">category</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span>
+        <span class="n">area</span><span class="o">=</span> <span class="n">area</span><span class="p">,</span>
+        <span class="n">price</span><span class="o">=</span><span class="n">price</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span> <span class="n">description</span><span class="p">,</span>
+        <span class="n">deleted</span> <span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">contact</span><span class="o">=</span><span class="n">Contact</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">first_name</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span>
+            <span class="n">family_name</span> <span class="o">=</span> <span class="n">last_name</span><span class="p">,</span>
+            <span class="n">address</span> <span class="o">=</span> <span class="n">personal_address</span><span class="p">,</span>
+            <span class="n">phone</span> <span class="o">=</span><span class="n">phone</span><span class="p">,</span>
+            <span class="n">mail</span> <span class="o">=</span><span class="n">email</span>
+        <span class="p">),</span>
+        <span class="n">location</span><span class="o">=</span><span class="n">LocationManager</span><span class="o">.</span><span class="n">creatLocation</span><span class="p">(</span><span class="n">commune</span><span class="p">,</span><span class="n">id_wilaya</span><span class="p">,</span><span class="n">address</span><span class="p">)</span>
+        <span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">uploaded_images</span><span class="p">:</span>
+            <span class="n">AnnoncementImage</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">annoncement</span> <span class="o">=</span><span class="n">annonce</span><span class="p">,</span><span class="n">image</span><span class="o">=</span><span class="n">img</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">annonce</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnnouncemntManager.delete_announcement"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AnnouncemntManager.delete_announcement">[docs]</a>    <span class="k">def</span> <span class="nf">delete_announcement</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function deletes an announcement based on its id (logic deletion).</span>
+
+<span class="sd">        :param id: The id of the announcement to be deleted.</span>
+<span class="sd">        :type id: int</span>
+<span class="sd">        :return: Returns an empty tuple.</span>
+<span class="sd">        :raises: Raises ValueError if the announcement has already been deleted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">announcement</span><span class="o">=</span> <span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">announcement</span><span class="o">.</span><span class="n">deleted</span> <span class="o">==</span><span class="kc">True</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">announcement</span><span class="o">.</span><span class="n">deleted</span> <span class="o">=</span><span class="kc">True</span>
+            <span class="n">announcement</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">()</span></div>
+    
+<div class="viewcode-block" id="AnnouncemntManager.get_announcements"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AnnouncemntManager.get_announcements">[docs]</a>    <span class="k">def</span> <span class="nf">get_announcements</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function retrieves all the announcements that have not been deleted, and orders them by creation date in descending order.</span>
+<span class="sd">    </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Queryset: A queryset containing the retrieved announcements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">deleted</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="AnnouncemntManager.get_announcement"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AnnouncemntManager.get_announcement">[docs]</a>    <span class="k">def</span> <span class="nf">get_announcement</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve an announcement by its id.</span>
+
+<span class="sd">        :param id: The id of the announcement to be retrieved.</span>
+<span class="sd">        :type id: int</span>
+<span class="sd">        :return: A QuerySet object containing the announcement with the specified id.</span>
+<span class="sd">        :rtype: QuerySet</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">deleted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="nb">id</span> <span class="o">=</span><span class="nb">id</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="AnnouncemntManager.search_filter"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.AnnouncemntManager.search_filter">[docs]</a>    <span class="k">def</span> <span class="nf">search_filter</span><span class="p">(</span><span class="n">search</span><span class="p">,</span><span class="n">category</span><span class="p">,</span><span class="n">commune</span><span class="p">,</span><span class="n">wilaya</span><span class="p">,</span><span class="nb">type</span><span class="p">,</span><span class="n">first_date</span><span class="p">,</span><span class="n">second_date</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            This function searches and filters through the announcements.</span>
+
+<span class="sd">            :param search: List of keywords to search for in the announcements</span>
+<span class="sd">            :type search: list</span>
+<span class="sd">            :param category: category id to filter by</span>
+<span class="sd">            :type category: int</span>
+<span class="sd">            :param commune: commune id to filter by</span>
+<span class="sd">            :type commune: int</span>
+<span class="sd">            :param wilaya:  wilaya id to filter by</span>
+<span class="sd">            :type wilaya: int</span>
+<span class="sd">            :param type: type id to filter by</span>
+<span class="sd">            :type type: int</span>
+<span class="sd">            :param first_date: Start date to filter by (optional)</span>
+<span class="sd">            :type first_date: str</span>
+<span class="sd">            :param second_date: End date to filter by (optional)</span>
+<span class="sd">            :type second_date: str</span>
+
+<span class="sd">            :return: Queryset of filtered and sorted announcements</span>
+<span class="sd">            :rtype: QuerySet</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">annonce</span> <span class="o">=</span> <span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">deleted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-creation_date&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span> <span class="p">(</span><span class="n">search</span> <span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">annoncement</span> <span class="o">=</span><span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">none</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">search</span><span class="p">:</span>
+                    <span class="n">annoncement</span><span class="o">=</span> <span class="n">annoncement</span> <span class="o">|</span> <span class="p">(</span><span class="n">annonce</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Q</span><span class="p">(</span><span class="n">title__iregex</span><span class="o">=</span><span class="sa">fr</span><span class="s2">&quot;\y(</span><span class="si">{</span><span class="n">keyword</span><span class="si">}</span><span class="s2">)\y&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">description__iregex</span><span class="o">=</span><span class="sa">fr</span><span class="s2">&quot;\y(</span><span class="si">{</span><span class="n">keyword</span><span class="si">}</span><span class="s2">)\y&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-creation_date&#39;</span><span class="p">))</span>
+                <span class="n">annonce</span> <span class="o">=</span><span class="n">annoncement</span>
+            <span class="k">if</span> <span class="n">category</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">annonce</span><span class="o">=</span> <span class="n">annonce</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">category__id__in</span><span class="o">=</span><span class="n">category</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="o">!=</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">annonce</span><span class="o">=</span> <span class="n">annonce</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">type__id__in</span><span class="o">=</span><span class="nb">type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">commune</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="p">:</span>
+                <span class="n">annonce</span><span class="o">=</span> <span class="n">annonce</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">location__commune__id__in</span><span class="o">=</span><span class="n">commune</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">wilaya</span><span class="o">!=</span><span class="s2">&quot;&quot;</span> <span class="p">:</span>
+                <span class="n">annonce</span><span class="o">=</span><span class="n">annonce</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">location__wilaya__id__in</span><span class="o">=</span><span class="n">wilaya</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">first_date</span><span class="o">!=</span><span class="s2">&quot;&quot;</span> <span class="p">:</span>
+                <span class="k">if</span> <span class="n">second_date</span><span class="o">!=</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+                    <span class="n">annonce</span><span class="o">=</span> <span class="n">annonce</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">creation_date__range</span><span class="o">=</span><span class="p">[</span><span class="n">first_date</span><span class="p">,</span><span class="n">second_date</span> <span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">annonce</span><span class="o">=</span> <span class="n">annonce</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">creation_date__date</span><span class="o">=</span><span class="n">first_date</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">second_date</span><span class="o">!=</span><span class="s2">&quot;&quot;</span> <span class="p">:</span>
+                    <span class="n">annonce</span><span class="o">=</span> <span class="n">annonce</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">creation_date__date</span><span class="o">=</span><span class="n">second_date</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">annonce</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="MessagManager"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.MessagManager">[docs]</a><span class="k">class</span> <span class="nc">MessagManager</span><span class="p">():</span>
+
+    <span class="c1"># ========COUNTER==========</span>
+    <span class="c1"># *) Unread recieved messages to a certain user</span>
+<div class="viewcode-block" id="MessagManager.unread_messages"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.MessagManager.unread_messages">[docs]</a>    <span class="k">def</span> <span class="nf">unread_messages</span><span class="p">(</span><span class="n">id_user</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the count of unread messages sent to a specific user.</span>
+
+<span class="sd">        :param id_user: The ID of the user to count unread messages for.</span>
+<span class="sd">        :type id_user: int</span>
+
+<span class="sd">        :return: The number of unread messages sent to the specified user.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Messages</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">status</span><span class="o">=</span> <span class="s1">&#39;Pending&#39;</span><span class="p">,</span><span class="n">sent_to</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span></div>
+
+    <span class="c1"># *) creates a new message</span>
+<div class="viewcode-block" id="MessagManager.send_message"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.MessagManager.send_message">[docs]</a>    <span class="k">def</span> <span class="nf">send_message</span><span class="p">(</span><span class="n">sending_user</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">recieving_user</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function allows a user to send a message to another user.</span>
+<span class="sd">    </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            sending_user (int): The id of the user who is sending the message.</span>
+<span class="sd">            recieving_user (int): The id of the user who will receive the message.</span>
+<span class="sd">            content (str): The content of the message.</span>
+<span class="sd">            title (str): The title of the message.</span>
+<span class="sd">    </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            message: The created message object.</span>
+<span class="sd">    </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If either the sending user or the receiving user does not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sent_by</span><span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">sending_user</span><span class="p">)</span>
+            <span class="n">sent_to</span><span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">recieving_user</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">User</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+        <span class="n">message</span> <span class="o">=</span><span class="n">Messages</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">,</span>
+            <span class="n">sent_by</span><span class="o">=</span><span class="n">sent_by</span><span class="p">,</span>
+            <span class="n">sent_to</span><span class="o">=</span><span class="n">sent_to</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+    <span class="c1"># *) Gets messges logged user recieved messages</span>
+<div class="viewcode-block" id="MessagManager.get_my_messages"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.MessagManager.get_my_messages">[docs]</a>    <span class="k">def</span> <span class="nf">get_my_messages</span><span class="p">(</span><span class="n">user_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all messages sent to a specific user.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        user_id (int): The ID of the user to retrieve messages for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        QuerySet: A QuerySet of the messages sent to the user.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">        ValueError: If the user does not exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">my_messages</span><span class="o">=</span> <span class="n">Messages</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">sent_to</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;created_at&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Messages</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+        <span class="k">return</span> <span class="n">my_messages</span></div>
+
+    <span class="c1"># *) Gets logged user sent messages</span>
+<div class="viewcode-block" id="MessagManager.get_sent_messages"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.MessagManager.get_sent_messages">[docs]</a>    <span class="k">def</span> <span class="nf">get_sent_messages</span><span class="p">(</span><span class="n">user_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a queryset containing the messages sent by the specified user, ordered by creation date in descending order.</span>
+
+<span class="sd">        :param user_id: The ID of the user who sent the messages.</span>
+<span class="sd">        :type user_id: int</span>
+<span class="sd">        :return: A queryset containing the messages sent by the specified user.</span>
+<span class="sd">        :rtype: Queryset</span>
+<span class="sd">        :raises ValueError: If no messages are found for the specified user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sent_messages</span><span class="o">=</span> <span class="n">Messages</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">sent_by</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Messages</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+        <span class="k">return</span> <span class="n">sent_messages</span></div>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="FavoriteManager"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.FavoriteManager">[docs]</a><span class="k">class</span> <span class="nc">FavoriteManager</span><span class="p">():</span>
+<div class="viewcode-block" id="FavoriteManager.add_favorate"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.FavoriteManager.add_favorate">[docs]</a>    <span class="k">def</span> <span class="nf">add_favorate</span><span class="p">(</span><span class="n">id_user</span><span class="p">,</span><span class="n">id_announcement</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an announcement to a user&#39;s list of favorites.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        id_user (int): ID of the user.</span>
+<span class="sd">        id_announcement (int): ID of the announcement.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        Announecement: the announcement added to user list of favourite.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">announcement</span> <span class="o">=</span> <span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">id_announcement</span><span class="p">,</span><span class="n">deleted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
+        <span class="n">announcement</span><span class="o">.</span><span class="n">favorated_by</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">announcement</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="FavoriteManager.remove_favorate"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.FavoriteManager.remove_favorate">[docs]</a>    <span class="k">def</span> <span class="nf">remove_favorate</span><span class="p">(</span><span class="n">id_user</span><span class="p">,</span><span class="n">id_announcement</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function removes a specific announcement from the favorites list of a user.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        id_user (int): The id of the user whose favorites list will be updated.</span>
+<span class="sd">        id_announcement (int): The id of the announcement to be removed from the user&#39;s favorites list.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">        ValueError: If the provided id_announcement does not correspond to an existing announcement or the provided id_user does not correspond to an existing user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">announcement</span> <span class="o">=</span> <span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">id_announcement</span><span class="p">,</span><span class="n">deleted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
+        <span class="n">announcement</span><span class="o">.</span><span class="n">favorated_by</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">()</span></div>
+    
+<div class="viewcode-block" id="FavoriteManager.get_my_favorites"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.servises.FavoriteManager.get_my_favorites">[docs]</a>    <span class="k">def</span> <span class="nf">get_my_favorites</span><span class="p">(</span><span class="n">user_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a queryset of the Annoncement objects that are marked as favorites by a specific user. </span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">        user_id (int): The ID of the user whose favorite announcements will be retrieved.</span>
+<span class="sd">    </span>
+<span class="sd">        Returns:</span>
+<span class="sd">        QuerySet: A queryset of Annoncement objects that are marked as favorites by the specified user.</span>
+<span class="sd">    </span>
+<span class="sd">        Raises:</span>
+<span class="sd">        ValueError: If there is no Annoncement with the specified user_id or if the Annoncement objects are not marked as favorites by the specified user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">my_fav</span><span class="o">=</span> <span class="n">Annoncement</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">favorated_by</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span><span class="n">deleted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Annoncement</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+        <span class="k">return</span> <span class="n">my_fav</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2023, m.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

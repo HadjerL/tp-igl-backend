@@ -3,13 +3,10 @@ from gestionAnnonce import views
 from rest_framework.routers import DefaultRouter
 
 router =DefaultRouter()
-router.register('announcements', views.viewsets_annoncement)
 router.register('types', views.viewsets_type)
 router.register('categories',views.viewsets_category)
 router.register('wilayas',views.viewsets_wilayas)
 router.register('communes',views.viewsets_commune)
-router.register('addresses',views.viewsets_address)
-router.register('locations',views.viewsets_location)
 router.register('messages', views.viewsets_message)
 
 
@@ -17,10 +14,6 @@ urlpatterns = [
     # path('modify/<int:id>',views.modify_Announcement),
     path('create/',views.create_Annocement ),
     path('userAnnoncement/',views.user_annocement ),
-    path('find_type/<str:type>/', views.find_annocement_type),
-    path('find_wilaya/<str:wilaya>/',views.find_annocement_wilaya),
-    path('find_commune/<str:commune>/',views.find_annocement_commune),
-    path('find_category/<str:category>/',views.find_annocement_category),
     path('all_announcement/',views.all_announcemnt),
     path('get_announcement/<int:id>/',views.get_announcement),
     path('delete_announcement/<int:id>/',views.delete_announcemnt),

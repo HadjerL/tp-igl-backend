@@ -1,7 +1,7 @@
 from django.test import TestCase
 from gestionAnnonce.servises import AuthManager,MessagManager ,FavoriteManager
 from gestionAnnonce.models import User ,Annoncement,Category,Type ,Contact,Location,Address,Wilaya,Commune
-from datetime import datetime
+
 
 class Testauthmanger(TestCase):
 

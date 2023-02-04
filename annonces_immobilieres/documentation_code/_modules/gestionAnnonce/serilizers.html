@@ -1,0 +1,391 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>gestionAnnonce.serilizers &mdash; announcementproject_backend 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> announcementproject_backend
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">annonces_immobilieres</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">announcementproject_backend</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>gestionAnnonce.serilizers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gestionAnnonce.serilizers</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">rest_framework</span> <span class="kn">import</span> <span class="n">serializers</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Annoncement</span><span class="p">,</span> <span class="n">Contact</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Wilaya</span><span class="p">,</span> <span class="n">Commune</span><span class="p">,</span> <span class="n">Location</span><span class="p">,</span> <span class="n">AnnoncementImage</span><span class="p">,</span> <span class="n">Address</span><span class="p">,</span> <span class="n">User</span><span class="p">,</span> <span class="n">Token</span><span class="p">,</span> <span class="n">Messages</span>
+
+
+<span class="c1">#translate python to json</span>
+
+
+
+<div class="viewcode-block" id="ContactSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.ContactSerializer">[docs]</a><span class="k">class</span> <span class="nc">ContactSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for the Contact model.</span>
+
+<span class="sd">    This serializer will handle the conversion of a Contact model instance into</span>
+<span class="sd">    Python data types that can be easily rendered into JSON .</span>
+
+<span class="sd">    The ContactSerializer uses all fields specified by the model.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        model (Contact): The model to use for the serializer.</span>
+<span class="sd">        fields (all): The fields to include in the serializer output.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ContactSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.ContactSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Contact</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="s1">&#39;__all__&#39;</span></div></div>
+
+<div class="viewcode-block" id="TypeSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.TypeSerializer">[docs]</a><span class="k">class</span> <span class="nc">TypeSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for the Type model. This class is a subclass of serializers.ModelSerializer from the Django Rest Framework library. </span>
+<span class="sd">    </span>
+<span class="sd">    This serializer will handle the conversion of a Type model instance into</span>
+<span class="sd">    Python data types that can be easily rendered into JSON .</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        model (Type): The model to use for the serializer.</span>
+<span class="sd">        fields (all): The fields to include in the serializer,the value &#39;_all_&#39; indicates that all fields should be included.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="TypeSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.TypeSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Type</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="s1">&#39;__all__&#39;</span></div></div>
+
+<div class="viewcode-block" id="CategorySerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.CategorySerializer">[docs]</a><span class="k">class</span> <span class="nc">CategorySerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for the Category model.</span>
+
+<span class="sd">    This serializer will handle the conversion of a Category model instance into</span>
+<span class="sd">    Python data types that can be easily rendered into JSON .</span>
+
+<span class="sd">    The CategorySerializer uses all fields specified by the model.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        model (Category): The model to use for the serializer.</span>
+<span class="sd">        fields (all): The fields to include in the serializer output.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CategorySerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.CategorySerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Category</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="s1">&#39;__all__&#39;</span></div></div>
+
+<div class="viewcode-block" id="AnnoncementImageSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.AnnoncementImageSerializer">[docs]</a><span class="k">class</span> <span class="nc">AnnoncementImageSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of serializers.ModelSerializer from the Django Rest Framework library. </span>
+<span class="sd">    It is used to serialize instances of the AnnoncementImage model into Python data structures </span>
+<span class="sd">    that can be easily converted into JSON or other formats for APIs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="AnnoncementImageSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.AnnoncementImageSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">AnnoncementImage</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;annoncement&quot;</span><span class="p">]</span></div></div>
+
+<div class="viewcode-block" id="CommuneSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.CommuneSerializer">[docs]</a><span class="k">class</span> <span class="nc">CommuneSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of serializers.ModelSerializer from the Django Rest Framework library. </span>
+<span class="sd">    It is used to serialize instances of the Commune model into Python data structures, </span>
+<span class="sd">    that can be easily converted into JSON .</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wilaya</span><span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">StringRelatedField</span><span class="p">(</span><span class="n">many</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="CommuneSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.CommuneSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Commune</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;designation&#39;</span><span class="p">,</span><span class="s1">&#39;wilaya&#39;</span><span class="p">]</span></div></div>
+        <span class="c1"># gets the field designation from commune and locations related</span>
+
+<div class="viewcode-block" id="WilayaSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.WilayaSerializer">[docs]</a><span class="k">class</span> <span class="nc">WilayaSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of serializers.ModelSerializer from the Django Rest Framework library. </span>
+<span class="sd">    It is used to serialize instances of the Wilaya  model into Python data structures, </span>
+<span class="sd">    that can be easily converted into JSON .</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#targets the related field using its primaryKey</span>
+    <span class="n">commune</span> <span class="o">=</span> <span class="n">CommuneSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="WilayaSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.WilayaSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Wilaya</span>
+        <span class="c1"># gets the field designation from wilaya and all commune related</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="s1">&#39;designation&#39;</span><span class="p">,</span><span class="s1">&#39;commune&#39;</span><span class="p">]</span></div></div>
+
+<div class="viewcode-block" id="AddressSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.AddressSerializer">[docs]</a><span class="k">class</span> <span class="nc">AddressSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<div class="viewcode-block" id="AddressSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.AddressSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">=</span> <span class="n">Address</span>
+        <span class="n">fields</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;address&#39;</span><span class="p">,</span><span class="s1">&#39;latitude&#39;</span><span class="p">,</span><span class="s1">&#39;longitude&#39;</span><span class="p">,</span><span class="s1">&#39;location&#39;</span><span class="p">]</span></div></div>
+
+<div class="viewcode-block" id="LocationSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.LocationSerializer">[docs]</a><span class="k">class</span> <span class="nc">LocationSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of serializers.ModelSerializer from the Django Rest Framework library. </span>
+<span class="sd">    It is used to serialize instances of the Location  model into Python data structures, </span>
+<span class="sd">    that can be easily converted into JSON .</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wilaya</span><span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">StringRelatedField</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">commune</span><span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">StringRelatedField</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">address</span><span class="o">=</span> <span class="n">AddressSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="LocationSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.LocationSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Location</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;wilaya&#39;</span><span class="p">,</span><span class="s1">&#39;commune&#39;</span><span class="p">,</span><span class="s1">&#39;address&#39;</span><span class="p">]</span></div></div>
+    <span class="c1"># gets all fields along with related announcements</span>
+
+<div class="viewcode-block" id="AnnoceSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.AnnoceSerializer">[docs]</a><span class="k">class</span> <span class="nc">AnnoceSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of serializers.ModelSerializer from the Django Rest Framework library. </span>
+<span class="sd">    It is used to serialize instances of the Annoncement model into Python data structures, </span>
+<span class="sd">    that can be easily converted into JSON .</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">images</span><span class="o">=</span><span class="n">serializers</span><span class="o">.</span><span class="n">StringRelatedField</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">type</span><span class="o">=</span> <span class="n">TypeSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="n">CategorySerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">location</span><span class="o">=</span> <span class="n">LocationSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="AnnoceSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.AnnoceSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Annoncement</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;category&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;area&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;price&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;contact&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;creation_date&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;images&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;user&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;favorated_by&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;deleted&#39;</span>
+            <span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="tokenSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.tokenSerializer">[docs]</a><span class="k">class</span> <span class="nc">tokenSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of serializers.ModelSerializer from the Django Rest Framework library. </span>
+<span class="sd">    It is used to serialize instances of the Token  model into Python data structures, </span>
+<span class="sd">    that can be easily converted into JSON .</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="tokenSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.tokenSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Token</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="UserSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.UserSerializer">[docs]</a><span class="k">class</span> <span class="nc">UserSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a subclass of serializers.ModelSerializer from the Django Rest Framework library. </span>
+<span class="sd">    It is used to serialize instances of the User  model into Python data structures, </span>
+<span class="sd">    that can be easily converted into JSON .</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="UserSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.UserSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;email&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;annonce&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;last_login&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;date_joined&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;image&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;first_name&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;family_name&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;favorite&#39;</span><span class="p">,</span>
+        <span class="p">]</span></div></div>
+
+<div class="viewcode-block" id="SenderSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.SenderSerializer">[docs]</a><span class="k">class</span> <span class="nc">SenderSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<div class="viewcode-block" id="SenderSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.SenderSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;email&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;first_name&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;family_name&#39;</span><span class="p">,</span>
+        <span class="p">]</span></div></div>
+
+<div class="viewcode-block" id="MessageSerializer"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.MessageSerializer">[docs]</a><span class="k">class</span> <span class="nc">MessageSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+    <span class="n">sent_to</span><span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">PrimaryKeyRelatedField</span><span class="p">(</span><span class="n">many</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">sent_by</span><span class="o">=</span> <span class="n">SenderSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MessageSerializer.Meta"><a class="viewcode-back" href="../../gestionAnnonce.html#gestionAnnonce.serilizers.MessageSerializer.Meta">[docs]</a>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Messages</span>
+        <span class="n">fields</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">,</span><span class="s1">&#39;content&#39;</span><span class="p">,</span><span class="s1">&#39;sent_to&#39;</span><span class="p">,</span><span class="s1">&#39;sent_by&#39;</span><span class="p">,</span><span class="s1">&#39;created_at&#39;</span><span class="p">,</span><span class="s1">&#39;status&#39;</span><span class="p">]</span></div></div>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2023, m.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
